@@ -11,7 +11,6 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import type { Property } from "../../types/property";
 import { useFavorites } from "@/hooks/useFavorites";
-import { Button } from "../ui/button";
 
 export default function ListingDetail() {
   const { id } = useParams<{ id: string }>();

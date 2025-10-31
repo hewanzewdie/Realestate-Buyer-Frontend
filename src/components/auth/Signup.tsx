@@ -4,7 +4,7 @@ import { Switch } from '../ui/switch';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { useState } from "react";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { createUserProfile } from '@/lib/createUserProfile';
 import { auth } from '../../../firebase';
 

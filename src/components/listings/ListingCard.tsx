@@ -3,7 +3,6 @@ import { HeartIcon, BedIcon, BathIcon, Ruler, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useFavorites } from "../../hooks/useFavorites";
 import type { Property } from "../../types/property";
-import { Button } from "../ui/button";
 
 function PropertyCard(property: Property) {
   const { favorites, toggleFavorite } = useFavorites();
