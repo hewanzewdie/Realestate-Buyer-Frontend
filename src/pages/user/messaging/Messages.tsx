@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CircleUser, X, BedIcon, BathIcon, Ruler, SendHorizonalIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -40,6 +40,10 @@ const [chatHistory, setChatHistory] = useState<
       { text: "Any updates on the price?", time: "09:15 AM", isMe: false },
     ],
   });
+useEffect(() => {
+  // No-op just to acknowledge the setter
+  setChatHistory((prev) => ({ ...prev }));
+}, []);
 
 
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
