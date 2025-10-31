@@ -1,0 +1,1 @@
+// manage listing: view, edit, delete

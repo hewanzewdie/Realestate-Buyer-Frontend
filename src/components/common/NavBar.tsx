@@ -1,0 +1,149 @@
+import { Link, useNavigate } from "react-router-dom";
+import { SendHorizontal, Menu, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import logo from "../../assets/logo.png";
+import { Button } from "../ui/button";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+
+export default function NavBar() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsub = onAuthStateChanged(auth, (user) => setIsAuthenticated(!!user));
+    return () => unsub();
+  }, []);
+
+  const handleLogout = async () => {
+    const auth = getAuth();
+    await signOut(auth);
+    navigate("/login");
+  };
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setIsMenuOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const scrollToSection = (id: string) => {
+    const section = document.getElementById(id);
+    if (section) {
+      window.scrollTo({
+        top: section.offsetTop - 100,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  return (
+    <>
+      {!isMenuOpen && (
+        <header className="flex items-center justify-between p-4 sticky top-0 z-50 bg-green-50 shadow-md">
+          <img src={logo} alt="logo" className="w-10" />
+
+          {/* Desktop Nav  */}
+          <div className="hidden md:flex space-x-5">
+            {(!isAuthenticated) && ["home", "services", "listings"].map((id) => (
+              <a
+                key={id}
+                href={`#${id}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToSection(id);
+                }}
+                className="hover:font-semibold hover:underline hover:text-[#1bada2]"
+              >
+                {id.charAt(0).toUpperCase() + id.slice(1)}
+              </a>
+            ))}
+
+            {isAuthenticated && (
+              <>
+                <Link to="/" className="hover:font-semibold hover:underline hover:text-[#1bada2]">Home</Link>
+                <Link to="/listings" className="hover:font-semibold hover:underline hover:text-[#1bada2]">Listings</Link>
+                <Link to="/favorites" className="hover:font-semibold hover:underline hover:text-[#1bada2]">Favorites</Link>
+              </>
+            )}
+          </div>
+
+          {/* Desktop Right Side */}
+          <div className="hidden md:flex space-x-4 items-center">
+            {isAuthenticated ? (
+              <>
+                <Link to="/messages">
+                  <SendHorizontal className="w-6 h-6 hover:text-[#1bada2]" />
+                </Link>
+                <Button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white p-1.5 rounded-lg">Logout</Button>
+              </>
+            ) : (
+              <>
+                <Button className="p-1.5 rounded-lg bg-[#1bada2] text-white" onClick={() => navigate('/login')}>Login</Button>
+                <Button className="p-1.5 rounded-lg bg-[#1bada2] text-white" onClick={() => navigate('/signup')}>Sign Up</Button>
+              </>
+            )}
+          </div>
+
+          {/* Mobile menu toggle */}
+          <Button className="md:hidden bg-[#1bada2]" onClick={() => setIsMenuOpen(true)} >
+            <Menu />
+          </Button>
+        </header>
+      )}
+
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <header className="flex p-4 bg-green-50 backdrop-blur-md w-full sticky top-0 z-50 shadow">
+          <div className="w-full">
+            <div className="flex justify-end pr-4">
+              <Button onClick={() => setIsMenuOpen(false)} className="bg-[#1bada2]">
+                <X size={28} />
+              </Button>
+            </div>
+            <div className="flex flex-col gap-4 pl-6 mt-4">
+              {!isAuthenticated && ["home", "services", "listings"].map((id) => (
+                <a
+                  key={id}
+                  href={`#${id}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToSection(id);
+                    setIsMenuOpen(false);
+                  }}
+                  className="font-semibold hover:text-[#1bada2] cursor-pointer"
+                >
+                  {id.charAt(0).toUpperCase() + id.slice(1)}
+                </a>
+              ))}
+
+              {isAuthenticated && (
+                <>
+                  <Link to="/" onClick={() => setIsMenuOpen(false)} className="hover:font-semibold hover:underline hover:text-[#1bada2]">Home</Link>
+                  <Link to="/listings" onClick={() => setIsMenuOpen(false)} className="hover:font-semibold hover:underline hover:text-[#1bada2]">Listings</Link>
+                  <Link to="/favorites" onClick={() => setIsMenuOpen(false)} className="hover:font-semibold hover:underline hover:text-[#1bada2]">Favorites</Link>
+                  <Link to="/messages" onClick={() => setIsMenuOpen(false)} className="hover:text-[#1bada2]">
+                    <SendHorizontal className="w-6 h-6" />
+                  </Link>
+                  <Button onClick={() => { setIsMenuOpen(false); handleLogout(); }} className="bg-red-600 hover:bg-red-700 text-white p-1.5 rounded-lg">Logout</Button>
+                </>
+              )}
+
+              {!isAuthenticated && (
+                <>
+                  <Button className="p-1.5 rounded-lg bg-[#1bada2] text-white" onClick={() => { setIsMenuOpen(false); navigate('/login'); }}>Login</Button>
+                  <Button className="p-1.5 rounded-lg bg-[#1bada2] text-white" onClick={() => { setIsMenuOpen(false); navigate('/signup'); }}>Sign Up</Button>
+                </>
+              )}
+            </div>
+          </div>
+        </header>
+      )}
+    </>
+  );
+}
