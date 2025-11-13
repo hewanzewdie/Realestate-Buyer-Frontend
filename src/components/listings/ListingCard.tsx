@@ -3,7 +3,7 @@ import { HeartIcon, BedIcon, BathIcon, Ruler, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useFavorites } from "../../hooks/useFavorites";
 import type { Property } from "../../types/property";
-
+import toast from "react-hot-toast";
 function PropertyCard(property: Property) {
   const { favorites, toggleFavorite } = useFavorites();
   const isFavorited = favorites.includes(property.id);
@@ -24,7 +24,7 @@ function PropertyCard(property: Property) {
             {property.forRent ? "For Rent" : "For Sale"}
           </p>
           <img
-            src="https://images.unsplash.com/photo-1759238136818-7b00ec9e782a?w=500&auto=format&fit=crop&q=60"
+            src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aG91c2V8ZW58MHx8MHx8fDA%3D"
             alt={property.title}
             className="rounded-xl w-full h-48 object-cover"
           />
@@ -48,6 +48,7 @@ function PropertyCard(property: Property) {
               onClick={(e) => {
                 e.preventDefault(); 
                 toggleFavorite(property.id);
+                toast.success(isFavorited ? 'Removed from favorites' : 'Added to favorites');
               }}
                 className={`w-5 h-5 transition-colors ${
                   isFavorited ? "fill-red-500 text-red-500" : "text-gray-400"

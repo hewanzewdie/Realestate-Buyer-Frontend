@@ -7,6 +7,7 @@ import { useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { createUserProfile } from '@/lib/createUserProfile';
 import { auth } from '../../../firebase';
+import  toast  from "react-hot-toast";
 
 export default function Signup({ setIsAuthenticated }: { setIsAuthenticated: (val: boolean) => void }) {
     const navigate = useNavigate();
@@ -39,8 +40,8 @@ export default function Signup({ setIsAuthenticated }: { setIsAuthenticated: (va
                 propertiesListed: []
             });
 
-            alert(`Account created successfully as ${role}!`);
             setIsAuthenticated(true);
+            toast.success('Successfully Signed Up!')
             navigate("/");
         } catch (error: any) {
             setError(error.message);

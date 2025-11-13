@@ -7,35 +7,32 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../../components/ui/select";
-import { useState, useEffect } from "react";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { useState } from "react";
+import { useFavorites } from "../../../hooks/useFavorites";
 
 export default function Listings() {
-  const [type, setType] = useState<ListingFilters['type']>('all');
+  const [type, setType] = useState<ListingFilters["type"]>("all");
   const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
   const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
   const [location, setLocation] = useState<string | undefined>(undefined);
-  const [propertyType, setPropertyType] = useState<ListingFilters['propertyType']>(undefined);
-  const [activeTab, setActiveTab] = useState<'all' | 'saved'>('all');
-  const [favorites, setFavorites] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [propertyType, setPropertyType] = useState<
+    ListingFilters["propertyType"]
+  >(undefined);
+  const [activeTab, setActiveTab] = useState<"all" | "saved">("all");
 
-  useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        const savedFavorites = localStorage.getItem(`favorites_${user.uid}`) || '[]';
-        setFavorites(JSON.parse(savedFavorites));
-      }
-      setIsLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
+  // ✅ use Firestore favorites instead of localStorage
+  const { favorites, loading: favoritesLoading } = useFavorites();
 
-  const filters: ListingFilters = { type, minPrice, maxPrice, location, propertyType };
+  const filters: ListingFilters = {
+    type,
+    minPrice,
+    maxPrice,
+    location,
+    propertyType,
+  };
 
   const clearFilters = () => {
-    setType('all');
+    setType("all");
     setMinPrice(undefined);
     setMaxPrice(undefined);
     setLocation(undefined);
@@ -46,10 +43,38 @@ export default function Listings() {
     <div className="p-10 flex flex-col space-y-5">
       <p className="text-2xl font-semibold">Listings</p>
 
+      {/* Sale/Rent buttons */}
       <div className="flex space-x-3">
-        <Button className={`p-1.5 w-16 rounded-md ${type==='all' ? 'bg-[#1bada2] hover:bg-[#1bada2]' : 'bg-gray-300 text-black hover:text-white'}`} onClick={() => setType('all')}>All</Button>
-        <Button className={`p-1.5 w-16 rounded-md ${type==='sale' ? 'bg-[#1bada2] hover:bg-[#1bada2]' : 'bg-gray-300 text-black hover:text-white'}`} onClick={() => setType('sale')}>Sale</Button>
-        <Button className={`p-1.5 w-16 rounded-md ${type==='rent' ? 'bg-[#1bada2] hover:bg-[#1bada2]' : 'bg-gray-300 text-black hover:text-white'}`} onClick={() => setType('rent')}>Rent</Button>
+        <Button
+          className={`p-1.5 w-16 rounded-md ${
+            type === "all"
+              ? "bg-[#1bada2] hover:bg-[#1bada2]"
+              : "bg-gray-300 text-black hover:text-white"
+          }`}
+          onClick={() => setType("all")}
+        >
+          All
+        </Button>
+        <Button
+          className={`p-1.5 w-16 rounded-md ${
+            type === "sale"
+              ? "bg-[#1bada2] hover:bg-[#1bada2]"
+              : "bg-gray-300 text-black hover:text-white"
+          }`}
+          onClick={() => setType("sale")}
+        >
+          Sale
+        </Button>
+        <Button
+          className={`p-1.5 w-16 rounded-md ${
+            type === "rent"
+              ? "bg-[#1bada2] hover:bg-[#1bada2]"
+              : "bg-gray-300 text-black hover:text-white"
+          }`}
+          onClick={() => setType("rent")}
+        >
+          Rent
+        </Button>
       </div>
 
       {/* Filters */}
@@ -98,7 +123,7 @@ export default function Listings() {
                 <SelectItem value="Kazanchis">Kazanchis</SelectItem>
                 <SelectItem value="CMC">CMC</SelectItem>
                 <SelectItem value="Megenagna">Megenagna</SelectItem>
-                <SelectItem value="Piazza">Piasa</SelectItem>
+                <SelectItem value="Piazza">Piazza</SelectItem>
                 <SelectItem value="Gelan">Gelan</SelectItem>
                 <SelectItem value="Bahir Dar">Bahir Dar</SelectItem>
                 <SelectItem value="Merkato">Merkato</SelectItem>
@@ -123,8 +148,11 @@ export default function Listings() {
             </Select>
           </div>
 
-          {/* Buttons */}
-          <Button onClick={clearFilters} className="bg-[#1bada2] p-1 w-full self-end md:w-40 rounded-lg text-white">
+          {/* Clear Filters */}
+          <Button
+            onClick={clearFilters}
+            className="bg-[#1bada2] p-1 w-full self-end md:w-40 rounded-lg text-white"
+          >
             Clear filters
           </Button>
         </div>
@@ -132,15 +160,23 @@ export default function Listings() {
 
       {/* Tabs */}
       <div className="flex space-x-5">
-        <button 
-          onClick={() => setActiveTab('all')}
-          className={`font-semibold ${activeTab === 'all' ? 'text-green-600 underline underline-green-600' : 'text-gray-600'}`}
+        <button
+          onClick={() => setActiveTab("all")}
+          className={`font-semibold ${
+            activeTab === "all"
+              ? "text-green-600 underline underline-green-600"
+              : "text-gray-600"
+          }`}
         >
           All Listings
         </button>
-        <button 
-          onClick={() => setActiveTab('saved')}
-          className={`font-semibold ${activeTab === 'saved' ? 'text-green-600 underline underline-green-600' : 'text-gray-600'}`}
+        <button
+          onClick={() => setActiveTab("saved")}
+          className={`font-semibold ${
+            activeTab === "saved"
+              ? "text-green-600 underline underline-green-600"
+              : "text-gray-600"
+          }`}
         >
           Saved Listings
         </button>
@@ -148,15 +184,17 @@ export default function Listings() {
 
       {/* Listings */}
       <div>
-        {isLoading ? (
+        {favoritesLoading ? (
           <div className="text-center py-8">Loading...</div>
-        ) : activeTab === 'saved' ? (
+        ) : activeTab === "saved" ? (
           favorites.length > 0 ? (
-            <Listing filters={{...filters, favorites}} />
+            <Listing filters={{ ...filters, favorites }} />
           ) : (
             <div className="text-center py-8">
               <p className="text-gray-500 text-lg">Nothing to show here</p>
-              <p className="text-gray-400">You haven't saved any properties yet.</p>
+              <p className="text-gray-400">
+                You haven't saved any properties yet.
+              </p>
             </div>
           )
         ) : (

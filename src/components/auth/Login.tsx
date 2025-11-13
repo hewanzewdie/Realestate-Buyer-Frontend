@@ -5,7 +5,8 @@ import { Input } from "../ui/input";
 import { useState } from "react";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-
+import  toast  from "react-hot-toast";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 export default function Login({
   setIsAuthenticated,
 }: {
@@ -13,7 +14,7 @@ export default function Login({
 }) {
   const auth = getAuth();
   const navigate = useNavigate();
-
+const db = getFirestore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [authing, setAuthing] = useState(false);
@@ -24,15 +25,38 @@ export default function Login({
     setAuthing(true);
     setError("");
 
-    signInWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        setIsAuthenticated(true);
-        navigate("/");
-      })
-      .catch((error) => {
-        setError(error.message);
-        setAuthing(false);
-      });
+    // signInWithEmailAndPassword(auth, email, password)
+    //   .then(() => {
+    //     setIsAuthenticated(true);
+    //     toast.success('Successfully Logged In!')
+    //     navigate("/");
+    //   })
+    //   .catch((error) => {
+    //     setError(error.message);
+    //     setAuthing(false);
+    //   });
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Fetch user role
+      const docRef = doc(db, "users", user.uid);
+      const docSnap = await getDoc(docRef);
+      const userData = docSnap.data();
+
+      if (userData?.role === "seller") {
+        toast.success("Welcome back, Seller!");
+        navigate("/realtorListings");
+      } else {
+        toast.success("Welcome back, Buyer!");
+        navigate("/listings");
+      }
+
+      setIsAuthenticated(true);
+    } catch (error: any) {
+      setError(error.message);
+      setAuthing(false);
+    }
   };
 
   return (

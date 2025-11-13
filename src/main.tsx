@@ -21,16 +21,26 @@ import ListingDetail from "./components/listings/ListingDetail.tsx";
 import Layout from "./components/common/Layout.tsx";
 import { SidebarProvider } from "./components/ui/sidebar.tsx";
 import { createUserProfile } from "./lib/createUserProfile.ts";
+import RealtorListings from "./pages/realtor/listing/index.tsx";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
+import RealtorDashboard from "./pages/realtor/dashboard/index.tsx";
 
 const Root = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   React.useEffect(() => {
     const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const db = getFirestore();
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
          createUserProfile(user);
+         const docSnap = await getDoc(doc(db, "users", user.uid));
+         if (docSnap.exists()) {
+          setUserRole(docSnap.data().role);
+          }
+          setIsAuthenticated(true);
       }
       setIsAuthenticated(!!user);
       setLoading(false);
@@ -58,21 +68,33 @@ const Root = () => {
         {/* All other pages with layout */}
         <Route element={<Layout />}>
           <Route path="/" element={<App />} />
-          <Route path="/listingDetail/:id" element={<ListingDetail />} />
+          <Route path="/listingDetail/:id" element={
+            <AuthRoute isAuthenticated={isAuthenticated}>
+            <ListingDetail />
+            </AuthRoute>
+            } />
           <Route
             path="/listings"
             element={
-              <AuthRoute isAuthenticated={isAuthenticated}>
-                <Listings />
-              </AuthRoute>
+                userRole === "seller" ? (
+                  <Navigate to="/realtorListings" />
+                ) : (
+                  <AuthRoute isAuthenticated={isAuthenticated}>
+                    <Listings />
+                  </AuthRoute>
+                )
             }
           />
           <Route
             path="/favorites"
             element={
+              userRole === "seller" ? (
+                <Navigate to="/realtorDashboard" />
+              ) : (
               <AuthRoute isAuthenticated={isAuthenticated}>
                 <Favorites />
               </AuthRoute>
+              )
             }
           />
           <Route
@@ -84,6 +106,23 @@ const Root = () => {
             }
           />
           <Route path="*" element={<Navigate to="/" />} />
+
+          <Route 
+          path="/realtorListings" 
+          element={
+            <AuthRoute isAuthenticated={isAuthenticated}>
+              <RealtorListings />
+            </AuthRoute>
+          } 
+          />
+          <Route 
+          path="/realtorDashboard" 
+          element={
+            <AuthRoute isAuthenticated={isAuthenticated}>
+<RealtorDashboard/>
+</AuthRoute>
+          } 
+          />  
         </Route>
       </Routes>
     </Router>

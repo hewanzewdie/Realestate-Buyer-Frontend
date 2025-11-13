@@ -1,6 +1,5 @@
-// src/hooks/useFavorites.ts
 import { useEffect, useState } from "react";
-import { getAuth } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import {
   doc,
   getDoc,
@@ -8,38 +7,39 @@ import {
   arrayUnion,
   arrayRemove,
 } from "firebase/firestore";
-import { db } from "../../firebase"
+import { db } from "../../firebase";
 
 export function useFavorites() {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const auth = getAuth();
-  const user = auth.currentUser;
+  const [userId, setUserId] = useState<string | null>(null);
 
-  // Load favorites when user changes
   useEffect(() => {
-    if (!user) {
-      setFavorites([]);
-      setLoading(false);
-      return;
-    }
-
-    const loadFavorites = async () => {
-      try {
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        const data = userDoc.data();
-        setFavorites(data?.favorites || []);
-      } catch (err) {
-        console.error("Failed to load favorites:", err);
-      } finally {
-        setLoading(false);
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        setUserId(currentUser.uid);
+        try {
+          const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+          const data = userDoc.data();
+          setFavorites(data?.favorites || []);
+        } catch (err) {
+          console.error("Failed to load favorites:", err);
+        }
+      } else {
+        setUserId(null);
+        setFavorites([]);
       }
-    };
+      setLoading(false);
+    });
 
-    loadFavorites();
-  }, [user]);
+    return unsubscribe;
+  }, []);
 
   const toggleFavorite = async (propertyId: string) => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+
     if (!user) {
       alert("Please log in to save favorites");
       return;

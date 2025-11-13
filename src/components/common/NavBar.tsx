@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import logo from "../../assets/logo.png";
 import { Button } from "../ui/button";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import toast from "react-hot-toast";
 
 export default function NavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
