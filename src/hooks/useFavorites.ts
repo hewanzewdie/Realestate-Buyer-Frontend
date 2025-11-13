@@ -36,6 +36,12 @@ export function useFavorites() {
     return unsubscribe;
   }, []);
 
+  useEffect(() => {
+    if (userId) {
+      console.debug("Active user ID (for reference):", userId);
+    }
+  }, [userId]);
+
   const toggleFavorite = async (propertyId: string) => {
     const auth = getAuth();
     const user = auth.currentUser;
