@@ -14,4 +14,5 @@ export interface Property {
   rentPrice?: number;
   leaseTerm?: string;
   status: 'available' | 'sold' | 'rented' | 'pending'; 
+  sellerId: string;
 }

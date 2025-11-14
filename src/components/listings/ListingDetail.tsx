@@ -21,6 +21,8 @@ export default function ListingDetail() {
   const { favorites, toggleFavorite } = useFavorites();
   const isFavorited = property ? favorites.includes(property.id) : false;
 
+  const api = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     const fetchProperty = async () => {
       if (!id) return;
@@ -30,7 +32,7 @@ export default function ListingDetail() {
         setError(null);
         console.log(`Fetching property ${id} from API...`);
 
-        const response = await fetch(`/api/properties/${id}`, {
+        const response = await fetch(`${api}/properties/${id}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -73,7 +75,7 @@ export default function ListingDetail() {
     };
 
     fetchProperty();
-  }, [id]);
+  }, [id, api]);
 
   if (loading) {
     return (

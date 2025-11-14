@@ -8,6 +8,7 @@ export default function FavoritesPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [isFetching, setIsFetching] = useState(false);
 
+  const api = import.meta.env.VITE_API_URL;
   useEffect(() => {
     // No user or no favorites
     if (loading) return;
@@ -21,7 +22,7 @@ export default function FavoritesPage() {
       try {
         const fetchedProperties = await Promise.all(
           favorites.map(async (id) => {
-            const res = await fetch(`/api/properties/${id}`);
+            const res = await fetch(`${api}/properties/${id}`);
             if (!res.ok) throw new Error(`Failed to fetch property ${id}`);
             return res.json();
           })
@@ -35,7 +36,7 @@ export default function FavoritesPage() {
     };
 
     fetchFavorites();
-  }, [favorites, loading]);
+  }, [favorites, loading, api]);
 
   if (loading || isFetching)
     return <p className="text-center text-gray-500 py-10">Loading favorites...</p>;

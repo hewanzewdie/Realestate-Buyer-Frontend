@@ -60,6 +60,8 @@ function PropertyList(props: { filters?: ListingFilters; showOnly?: number }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const api = import.meta.env.VITE_API_URL;
+
   const filtered = applyFilters(allProperties, props.filters ?? {});
   const displayProperties = props.showOnly
     ? filtered.slice(0, props.showOnly)
@@ -72,7 +74,7 @@ function PropertyList(props: { filters?: ListingFilters; showOnly?: number }) {
         setError(null);
         console.log("Fetching properties from API...");
 
-        const response = await fetch("/api/properties", {
+        const response = await fetch(`${api}/properties`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
