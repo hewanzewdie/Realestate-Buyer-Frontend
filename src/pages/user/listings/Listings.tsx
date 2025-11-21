@@ -20,7 +20,6 @@ export default function Listings() {
   >(undefined);
   const [activeTab, setActiveTab] = useState<"all" | "saved">("all");
 
-  // ✅ use Firestore favorites instead of localStorage
   const { favorites, loading: favoritesLoading } = useFavorites();
 
   const filters: ListingFilters = {

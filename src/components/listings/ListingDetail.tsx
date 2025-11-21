@@ -11,6 +11,7 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import type { Property } from "../../types/property";
 import { useFavorites } from "@/hooks/useFavorites";
+import { getAuth } from "firebase/auth";
 
 export default function ListingDetail() {
   const { id } = useParams<{ id: string }>();
@@ -22,7 +23,7 @@ export default function ListingDetail() {
   const isFavorited = property ? favorites.includes(property.id) : false;
 
   const api = import.meta.env.VITE_API_URL;
-
+  
   useEffect(() => {
     const fetchProperty = async () => {
       if (!id) return;
@@ -123,7 +124,7 @@ export default function ListingDetail() {
 
             <HeartIcon onClick={() => property && toggleFavorite(property.id)}
               className={`w-6 h-6 transition-colors ${
-                isFavorited ? "fill-red-500 text-red-500" : "text-gray-400"
+                isFavorited ? "fill-red-500 text-red-500" : ""
               }`}
             />
                  <MessageSquareText className="cursor-pointer" />

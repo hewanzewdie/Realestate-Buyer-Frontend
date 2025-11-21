@@ -21,7 +21,7 @@ import ListingDetail from "./components/listings/ListingDetail.tsx";
 import Layout from "./components/common/Layout.tsx";
 import { SidebarProvider } from "./components/ui/sidebar.tsx";
 import { createUserProfile } from "./lib/createUserProfile.ts";
-import RealtorListings from "./pages/realtor/listing/index.tsx";
+import RealtorListings from "./pages/realtor/listing/MyListing.tsx";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import RealtorDashboard from "./pages/realtor/dashboard/index.tsx";
 
