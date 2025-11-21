@@ -24,6 +24,7 @@ import { createUserProfile } from "./lib/createUserProfile.ts";
 import RealtorListings from "./pages/realtor/listing/MyListing.tsx";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import RealtorDashboard from "./pages/realtor/dashboard/index.tsx";
+import SellerListings from "./pages/realtor/listing/MyListing.tsx";
 
 const Root = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -77,7 +78,9 @@ const Root = () => {
             path="/listings"
             element={
                 userRole === "seller" ? (
-                  <Navigate to="/realtorListings" />
+                  <AuthRoute isAuthenticated={isAuthenticated}>
+                    <SellerListings/>
+                    </AuthRoute>
                 ) : (
                   <AuthRoute isAuthenticated={isAuthenticated}>
                     <Listings />

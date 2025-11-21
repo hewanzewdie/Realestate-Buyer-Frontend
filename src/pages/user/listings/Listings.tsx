@@ -133,7 +133,7 @@ export default function Listings() {
           {/* Property Type */}
           <div className="flex flex-col space-y-2">
             <p>Property type</p>
-            <Select onValueChange={(v) => setPropertyType(v as any)}>
+            <Select onValueChange={(v) => setPropertyType(v as typeof propertyType)}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Any" />
               </SelectTrigger>
