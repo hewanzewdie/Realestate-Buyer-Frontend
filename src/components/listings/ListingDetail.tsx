@@ -50,6 +50,10 @@ export default function ListingDetail() {
   };
   
     const handleDelete = async () => {
+      if (!property?.id) {
+    toast.error("Property not loaded");
+    return;
+  }
     if (!confirm("Delete this property?")) return;
   
     try {
