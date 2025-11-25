@@ -118,7 +118,7 @@ export default function NavBar() {
                   )}
                 </div>
 
-                <Button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white p-1.5 rounded-lg">Logout</Button>
+                <Button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white p-1.5 w-20 rounded-lg">Logout</Button>
               </>
             ) : (
               <>

@@ -212,6 +212,7 @@ export default function ListingDetail() {
                 e.stopPropagation();
                 toggleFavorite(property.id);
               }}
+              disabled={!user}
               className="p-2 bg-white border border-red-200 hover:bg-red-100"
             >
               <HeartIcon

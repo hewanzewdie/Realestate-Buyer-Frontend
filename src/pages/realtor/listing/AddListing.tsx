@@ -257,9 +257,9 @@ export function AddListing({ trigger, onAddListing }: AddListingProps) {
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" disabled={isLoading}>
-              Cancel
-            </Button>
+<DialogClose asChild>     
+  <Button variant="outline" disabled={isLoading}>Cancel</Button>         
+            </DialogClose>
             <Button
               type="submit"
               className="bg-[#1bada2] hover:bg-teal-700 text-white"
