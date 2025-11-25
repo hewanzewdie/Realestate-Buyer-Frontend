@@ -42,17 +42,17 @@ export default function Landing() {
            <p className="text-3xl font-semibold" id="services">Services</p>
            <p className="text-2xl text-center">We offer Best services</p>
            <div className="flex flex-col md:flex-row gap-10 items-center justify-center py-10">
-            <div className="flex flex-col items-center my-2 w=[90%] p-5 h-40 shadow-lg hover:shadow-xl rounded-md md:w-1/3 text-center group">
+            <div className="flex flex-col justify-center items-center my-2 w=[90%] p-5 lg:h-40 h-60 shadow-lg hover:shadow-xl rounded-md md:w-1/3 text-center group">
                 <HouseIcon className="group-hover:text-green-100 group-hover:bg-[#1bada2] w-10 h-10 p-2 text-[#1bada2] bg-green-100 rounded-md"/>
                 <p className="text-xl font-semibold">House for rent</p>
                 <p>urban, sub-urban houses available for rent</p>
             </div>
-            <div className="flex flex-col items-center my-2 w=[90%] p-5 h-40 shadow-lg hover:shadow-xl rounded-md md:w-1/3 text-center group">
+            <div className="flex flex-col justify-center items-center my-2 w=[90%] p-5 lg:h-40 h-60 shadow-lg hover:shadow-xl rounded-md md:w-1/3 text-center group">
             <HouseHeart className="group-hover:text-green-100 group-hover:bg-[#1bada2] w-10 h-10 p-2 text-[#1bada2] bg-green-100 rounded-md"/>
                 <p className="text-xl font-semibold">House for Sale</p>
                 <p>urban, sub-urban houses available for sale</p>
             </div>
-            <div className="flex flex-col items-center my-2 w=[90%] p-5 h-40 shadow-lg hover:shadow-xl rounded-md md:w-1/3 text-center group">
+            <div className="flex flex-col justify-center items-center my-2 w=[90%] p-5 lg:h-40 h-60 shadow-lg hover:shadow-xl rounded-md md:w-1/3 text-center group">
                 <ShoppingBag className="group-hover:text-green-100 group-hover:bg-[#1bada2] w-10 h-10 p-2 text-[#1bada2] bg-green-100 rounded-md"/>
                 <p className="text-xl font-semibold">Real estate market</p>
                 <p>variety of homes available for sale and rent, you can also list your properties here</p>

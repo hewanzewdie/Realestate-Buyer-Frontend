@@ -6,12 +6,19 @@ import {
   Ruler,
   MessageSquareText,
   MessageCircleQuestionMark,
+  PencilIcon,
+  TrashIcon
 } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import type { Property } from "../../types/property";
 import { useFavorites } from "@/hooks/useFavorites";
 import { getAuth } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../../firebase";
+import toast from "react-hot-toast";
+import { Button } from "../ui/button";
+import EditListing from "@/pages/realtor/listing/EditListing";
 
 export default function ListingDetail() {
   const { id } = useParams<{ id: string }>();
@@ -22,6 +29,50 @@ export default function ListingDetail() {
   const { favorites, toggleFavorite } = useFavorites();
   const isFavorited = property ? favorites.includes(property.id) : false;
 
+  const user = getAuth().currentUser;
+    const [role, setRole] = useState<string | null>(null);
+  
+    useEffect(() => {
+      const fetchRole = async () => {
+        if (!user) return;
+        const ref = doc(db, "users", user.uid);
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+          setRole(snap.data().role); // "buyer" or "seller"
+        }
+      };
+      fetchRole();
+    }, [user]);
+  
+    const handleUpdate = () => {
+    window.location.reload();
+    toast.success("Property updated!");
+  };
+  
+    const handleDelete = async () => {
+    if (!confirm("Delete this property?")) return;
+  
+    try {
+      const api = import.meta.env.VITE_API_URL;
+  
+      const res = await fetch(`${api}/properties/${property.id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+  
+      if (!res.ok) {
+        throw new Error(`Failed with status ${res.status}`);
+      }
+  
+      toast.success("Property deleted");
+  
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete property");
+    }
+  };
+  
   const api = import.meta.env.VITE_API_URL;
   
   useEffect(() => {
@@ -122,13 +173,57 @@ export default function ListingDetail() {
         </div>
         <div className="flex space-x-2">
 
-            <HeartIcon onClick={() => property && toggleFavorite(property.id)}
-              className={`w-6 h-6 transition-colors ${
-                isFavorited ? "fill-red-500 text-red-500" : ""
-              }`}
-            />
-                 <MessageSquareText className="cursor-pointer" />
-          <MessageCircleQuestionMark className="cursor-pointer" />
+            <div className="px-5 pb-5 flex justify-between items-center">
+          {role === "seller" ? (
+            <div className="flex gap-3">
+              {/* Edit Dialog */}
+              <EditListing
+                trigger={
+                  <Button
+                    onClick={(e) => e.stopPropagation()} // ← THIS IS KEY
+                    className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 bg-white transition"
+                    title="Edit property"
+                  >
+                    <PencilIcon className="w-5 h-5 text-gray-700" />
+                  </Button>
+                }
+                property={property}
+                onUpdate={handleUpdate}
+              />
+
+              {/* Delete Button */}
+              <Button
+  onClick={(e) => {
+    e.stopPropagation();
+    handleDelete();
+  }}
+  className="p-2 rounded-lg border border-red-300 hover:bg-red-50 bg-white transition"
+  title="Delete property"
+>
+  <TrashIcon className="w-5 h-5 text-red-600" />
+</Button>
+
+            </div>
+          ) : (
+            // Favorite for buyers
+            <Button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleFavorite(property.id);
+              }}
+              className="p-2 bg-white border border-red-200 hover:bg-red-100"
+            >
+              <HeartIcon
+                className={`w-5 h-5 transition-colors ${
+                  isFavorited ? "fill-red-500 text-red-500" : "text-gray-400"
+                }`}
+              />
+            </Button>
+          )}
+        </div>
+                 <Button className="bg-white border border-gray-400 hover:bg-gray-100"><MessageSquareText className="cursor-pointer text-gray-700" /></Button>
+          <Button className="bg-white border border-gray-400 hover:bg-gray-100"><MessageCircleQuestionMark className="cursor-pointer text-gray-700" /></Button>
         </div>
       </div>
       <div className="grid grid-cols-4 grid-rows-2 w-full h-86 mb-5 gap-2">

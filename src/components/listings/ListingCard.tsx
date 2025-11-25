@@ -148,10 +148,10 @@ function PropertyCard(property: Property) {
                 e.stopPropagation();
                 toggleFavorite(property.id);
               }}
-              className="p-2"
+              className="p-2 bg-green-50 hover:bg-red-100"
             >
               <HeartIcon
-                className={`w-6 h-6 transition-colors bg-green-50 border border-gray-100 ${
+                className={`w-5 h-5 transition-colors ${
                   isFavorited ? "fill-red-500 text-red-500" : "text-gray-400"
                 }`}
               />

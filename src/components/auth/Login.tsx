@@ -25,16 +25,6 @@ const db = getFirestore();
     setAuthing(true);
     setError("");
 
-    // signInWithEmailAndPassword(auth, email, password)
-    //   .then(() => {
-    //     setIsAuthenticated(true);
-    //     toast.success('Successfully Logged In!')
-    //     navigate("/");
-    //   })
-    //   .catch((error) => {
-    //     setError(error.message);
-    //     setAuthing(false);
-    //   });
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
@@ -61,12 +51,12 @@ const db = getFirestore();
 
   return (
     <div className="flex py-10 w-200 h-160 m-auto">
-      <div className="bg-[#50b6c1] w-1/2 flex items-center justify-center hidden sm:flex shadow-xl">
+      <div className="bg-[#50b6c1] w-1/2 hidden md:flex items-center justify-center hidden sm:flex shadow-xl">
         <img src={logo} alt="" className="w-40 " />
       </div>
       <form
         onSubmit={signInWithEmail}
-        className='flex flex-col w-full shadow-xl md:w-1/2 p-8 justify-center gap-3 sm:static sm:translate-x-0 sm:translate-y-0 
+        className='flex flex-col w-[90%] shadow-xl md:w-1/2 p-8 justify-center gap-3 sm:static sm:translate-x-0 sm:translate-y-0 
           relative left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 sm:left-0 sm:top-0'
         >
         <div className="flex justify-between ">

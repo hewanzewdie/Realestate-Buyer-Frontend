@@ -122,8 +122,8 @@ export default function NavBar() {
               </>
             ) : (
               <>
-                <Button className="p-1.5 rounded-lg bg-[#1bada2] text-white" onClick={() => navigate('/login')}>Login</Button>
-                <Button className="p-1.5 rounded-lg bg-[#1bada2] text-white" onClick={() => navigate('/signup')}>Sign Up</Button>
+                <Button className="p-1.5 rounded-lg bg-[#1bada2] text-white w-20" onClick={() => navigate('/login')}>Login</Button>
+                <Button className="p-1.5 rounded-lg bg-[#1bada2] text-white w-20" onClick={() => navigate('/signup')}>Sign Up</Button>
               </>
             )}
           </div>
