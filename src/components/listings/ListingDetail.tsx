@@ -21,6 +21,14 @@ import toast from "react-hot-toast";
 import { Button } from "../ui/button";
 import EditListing from "@/pages/realtor/listing/EditListing";
 import { Skeleton } from "../ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
 export default function ListingDetail() {
   const { id } = useParams<{ id: string }>();
   const [property, setProperty] = useState<Property | null>(null);
@@ -51,34 +59,35 @@ export default function ListingDetail() {
     toast.success("Property updated!");
   };
   
-    const handleDelete = async () => {
-      if (!property?.id) {
-    toast.error("Property not loaded");
-    return;
+    const [deleteDialogOpen, setDeleteDialogOpen] =useState(false);
+const [deleting, setDeleting] = useState(false);
+  const handleDelete = async () => {
+  setDeleteDialogOpen(true); // Open the dialog instead of confirm()
+};
+  
+
+const confirmDelete = async () => {
+  setDeleting(true);
+  try {
+    const api = import.meta.env.VITE_API_URL;
+    const res = await fetch(`${api}/properties/${property?.id}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    if (!res.ok) throw new Error("Failed to delete");
+
+    toast.success("Property deleted successfully");
+    window.location.reload(); // or better: remove from state
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to delete property");
+  } finally {
+    setDeleting(false);
+    setDeleteDialogOpen(false);
   }
-    if (!confirm("Delete this property?")) return;
-  
-    try {
-      const api = import.meta.env.VITE_API_URL;
-  
-      const res = await fetch(`${api}/properties/${property.id}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-      });
-  
-      if (!res.ok) {
-        throw new Error(`Failed with status ${res.status}`);
-      }
-  
-      toast.success("Property deleted");
-  
-      window.location.reload();
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to delete property");
-    }
-  };
-  
+};
+
   const api = import.meta.env.VITE_API_URL;
   
   useEffect(() => {
@@ -303,6 +312,37 @@ export default function ListingDetail() {
           </p>
         </div>
       </div>
+      
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+  <DialogContent className="sm:max-w-md">
+    <DialogHeader>
+      <DialogTitle>Delete Property&nbsp;<i>{property.title}</i></DialogTitle>
+    </DialogHeader>
+
+    <div className="py-4">
+      <p className="text-gray-600">
+This action can't be undone      </p>
+    </div>
+
+    <DialogFooter className="gap-3 sm:gap-4">
+      <Button
+        variant="outline"
+        onClick={() => setDeleteDialogOpen(false)}
+        disabled={deleting}
+      >
+        Cancel
+      </Button>
+      <Button
+        variant="destructive"
+        onClick={confirmDelete}
+        disabled={deleting}
+        className="bg-red-600 hover:bg-red-700"
+      >
+        {deleting ? "Deleting..." : "Delete Property"}
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
     </div>
   );
 }

@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
 import { AddListing } from "./AddListing";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
 
 export default function SellerListings() {
 const [properties, setProperties] = useState<Property[]>([]);
@@ -14,24 +13,10 @@ const [loading, setLoading] = useState(true);
 
 const api = import.meta.env.VITE_API_URL;
 const user = getAuth().currentUser;
-const [role, setRole] = useState<string | null>(null);
- const db = getFirestore();
 
 const handleAddListing = (newProperty: Property) => {
 setProperties((prev) => [...prev, newProperty]);
 };
-
-useEffect(() => {
-    const fetchRole = async () => {
-      if (!user) return;
-      const ref = doc(db, "users", user.uid);
-      const snap = await getDoc(ref);
-      if (snap.exists()) {
-        setRole(snap.data().role); // "buyer" or "seller"
-      }
-    };
-    fetchRole();
-  }, [user,db]);
 
 useEffect(() => {
 if (!user) return;
