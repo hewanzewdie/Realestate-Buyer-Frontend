@@ -78,7 +78,7 @@ const confirmDelete = async () => {
     if (!res.ok) throw new Error("Failed to delete");
 
     toast.success("Property deleted successfully");
-    window.location.reload(); // or better: remove from state
+navigate(-1);
   } catch (err) {
     console.error(err);
     toast.error("Failed to delete property");
