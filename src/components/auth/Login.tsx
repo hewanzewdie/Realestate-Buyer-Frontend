@@ -7,6 +7,7 @@ import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import  toast  from "react-hot-toast";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { ArrowLeft } from "lucide-react";
 export default function Login({
   setIsAuthenticated,
 }: {
@@ -50,8 +51,10 @@ const db = getFirestore();
   };
 
   return (
+    <>
+        <Button onClick={()=>navigate('/')} className="ml-10 mt-10 bg-gray-300 text-black hover:bg-gray-400"><ArrowLeft/></Button>
     <div className="flex py-10 w-200 h-160 m-auto">
-      <div className="bg-[#50b6c1] w-1/2 hidden md:flex items-center justify-center hidden sm:flex shadow-xl">
+      <div className="bg-[#50b6c1] w-1/2 hidden md:flex items-center justify-center sm:flex shadow-xl">
         <img src={logo} alt="" className="w-40 " />
       </div>
       <form
@@ -100,5 +103,6 @@ const db = getFirestore();
         </p>
       </form>
     </div>
+    </>
   );
 }

@@ -48,16 +48,6 @@ export default function NavBar() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const scrollToSection = (id: string) => {
-    const section = document.getElementById(id);
-    if (section) {
-      window.scrollTo({
-        top: section.offsetTop - 100,
-        behavior: "smooth",
-      });
-    }
-  };
-
   return (
     <>
       {/* Desktop Nav */}
@@ -67,27 +57,15 @@ export default function NavBar() {
 
           {/* Desktop Links */}
           <div className="hidden md:flex space-x-5">
-            {!isAuthenticated &&
-              ["home", "services", "listings"].map((id) => (
-                <a
-                  key={id}
-                  href={`#${id}`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    scrollToSection(id);
-                  }}
-                  className="hover:font-semibold hover:underline hover:text-[#1bada2]"
-                >
-                  {id.charAt(0).toUpperCase() + id.slice(1)}
-                </a>
-              ))}
-
+              <Link to="/" className="hover:underline hover:text-[#1bada2]">Home</Link>
+             <Link to="/about" className="hover:underline hover:text-[#1bada2]">About</Link>
+              <Link to="/services" className="hover:underline hover:text-[#1bada2]">Services</Link>
+                  
             {isAuthenticated && (
               <>
-                <Link to="/" className="hover:font-semibold hover:underline hover:text-[#1bada2]">Home</Link>
-                <Link to="/listings" className="hover:font-semibold hover:underline hover:text-[#1bada2]">Listings</Link>
-                <Link to="/favorites" className="hover:font-semibold hover:underline hover:text-[#1bada2]">Favorites</Link>
-              </>
+               {/* <Link to="/favorites" className="hover:underline hover:text-[#1bada2]">Favorites</Link> */}
+                <Link to="/listings" className="hover:underline hover:text-[#1bada2]">Listings</Link>
+</>
             )}
           </div>
 
@@ -95,9 +73,9 @@ export default function NavBar() {
           <div className="hidden md:flex space-x-4 items-center relative">
             {isAuthenticated ? (
               <>
-                <Link to="/messages">
+                {/* <Link to="/messages">
                   <SendHorizontal className="w-6 h-6 hover:text-[#1bada2]" />
-                </Link>
+                </Link> */}
 
                 {/* Profile Dropdown */}
                 <div className="relative">
@@ -145,27 +123,14 @@ export default function NavBar() {
               </Button>
             </div>
             <div className="flex flex-col gap-4 pl-6 mt-4">
-              {!isAuthenticated &&
-                ["home", "services", "listings"].map((id) => (
-                  <a
-                    key={id}
-                    href={`#${id}`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      scrollToSection(id);
-                      setIsMenuOpen(false);
-                    }}
-                    className="font-semibold hover:text-[#1bada2] cursor-pointer"
-                  >
-                    {id.charAt(0).toUpperCase() + id.slice(1)}
-                  </a>
-                ))}
 
               {isAuthenticated && (
                 <>
-                  <Link to="/" onClick={() => setIsMenuOpen(false)} className="hover:font-semibold hover:underline hover:text-[#1bada2]">Home</Link>
-                  <Link to="/listings" onClick={() => setIsMenuOpen(false)} className="hover:font-semibold hover:underline hover:text-[#1bada2]">Listings</Link>
-                  <Link to="/favorites" onClick={() => setIsMenuOpen(false)} className="hover:font-semibold hover:underline hover:text-[#1bada2]">Favorites</Link>
+                  <Link to="/" onClick={() => setIsMenuOpen(false)} className="hover:underline hover:text-[#1bada2]">Home</Link>
+                  <Link to="/about" onClick={() => setIsMenuOpen(false)} className="hover:underline hover:text-[#1bada2]">About</Link>
+                  <Link to="/services" onClick={()=>setIsMenuOpen(false)} className="hover:underline hover:text-[#1bada2]">Services</Link>
+                  <Link to="/listings" onClick={() => setIsMenuOpen(false)} className="hover:underline hover:text-[#1bada2]">Listings</Link>
+                  {/* <Link to="/favorites" onClick={() => setIsMenuOpen(false)} className="hover:underline hover:text-[#1bada2]">Favorites</Link> */}
                   <Link to="/messages" onClick={() => setIsMenuOpen(false)} className="hover:text-[#1bada2]">
                     <SendHorizontal className="w-6 h-6" />
                   </Link>
@@ -183,6 +148,9 @@ export default function NavBar() {
 
               {!isAuthenticated && (
                 <>
+                 <Link to="/" onClick={() => setIsMenuOpen(false)} className="hover:underline hover:text-[#1bada2]">Home</Link>
+                  <Link to="/about" onClick={() => setIsMenuOpen(false)} className="hover:underline hover:text-[#1bada2]">About</Link>
+                  <Link to="/services" onClick={()=>setIsMenuOpen(false)} className="hover:underline hover:text-[#1bada2]">Services</Link>
                   <Button className="p-1.5 rounded-lg bg-[#1bada2] text-white" onClick={() => { setIsMenuOpen(false); navigate('/login'); }}>Login</Button>
                   <Button className="p-1.5 rounded-lg bg-[#1bada2] text-white" onClick={() => { setIsMenuOpen(false); navigate('/signup'); }}>Sign Up</Button>
                 </>

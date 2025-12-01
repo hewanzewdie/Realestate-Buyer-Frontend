@@ -7,9 +7,10 @@ import {
   MessageSquareText,
   MessageCircleQuestionMark,
   PencilIcon,
-  TrashIcon
+  TrashIcon,
+  ArrowLeft
 } from "lucide-react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import type { Property } from "../../types/property";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -19,7 +20,7 @@ import { db } from "../../../firebase";
 import toast from "react-hot-toast";
 import { Button } from "../ui/button";
 import EditListing from "@/pages/realtor/listing/EditListing";
-
+import { Skeleton } from "../ui/skeleton";
 export default function ListingDetail() {
   const { id } = useParams<{ id: string }>();
   const [property, setProperty] = useState<Property | null>(null);
@@ -29,6 +30,7 @@ export default function ListingDetail() {
   const { favorites, toggleFavorite } = useFavorites();
   const isFavorited = property ? favorites.includes(property.id) : false;
 
+  const navigate = useNavigate()
   const user = getAuth().currentUser;
     const [role, setRole] = useState<string | null>(null);
   
@@ -135,9 +137,38 @@ export default function ListingDetail() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-lg">Loading property details...</div>
+      <div className="p-10 w-full">
+      <div className="space-y-3">
+        <div className="flex justify-between space-x-5">
+          <div className="flex flex-col space-y-2"><Skeleton className="h-4 w-[250px]" />
+        <Skeleton className="h-4 w-[200px]" /></div>
+        <div className="flex space-x-2 self-start">
+      <Skeleton className="w-7 h-7"/>
+        <Skeleton className="w-7 h-7"/>
+      <Skeleton className="w-7 h-7"/></div>
+        </div>
+        
+        <div className="grid grid-cols-4 grid-rows-2 w-full h-86 mb-5 gap-2">
+        <Skeleton className=" col-start-1 col-end-3 row-start-1 row-end-3"/>
+        <Skeleton className="col-start-3 col-end-5 row-start-1 row-end-2"/>
+        <Skeleton className="col-start-3 col-end-4 row-start-2 row-end-3"/>
+        <Skeleton className="col-start-4 col-end-5 row-start-2 row-end-3"/>
       </div>
+      <div className="flex justify-between">
+      <div className="flex space-x-4">            
+        <Skeleton className="w-16 h-10"/>
+            <Skeleton className="w-16 h-10"/>
+      <Skeleton className="w-16 h-10"/>
+</div>
+      <Skeleton className="w-16 h-10"/>
+
+</div>
+<div className="flex justify-between">
+  <Skeleton className="w-2/3 h-5"/>
+  <Skeleton className="w-24 h-7"/>
+</div>
+      </div>
+    </div>
     );
   }
 
@@ -166,7 +197,9 @@ export default function ListingDetail() {
     : `$${property.rentPrice || 0}/month`;
 
   return (
-    <div className="bg-white p-10">
+    <div className="bg-white p-10">        
+    <Button className="bg-[#1bada2]" onClick={()=>{navigate(-1)}}><ArrowLeft/></Button>
+
       <div className="flex items-center justify-between mb-2">
         <div>
           <h1 className="text-lg font-semibold">{property.title}</h1>
@@ -259,7 +292,7 @@ export default function ListingDetail() {
         <p className="text-sm text-gray-600 mb-2">
           {property.description || "No description available"}
         </p>
-        <p className="text-xl font-bold text-red-500 ml-2">{priceText}</p>
+        <p className="text-xl font-bold text-[#1bada2] ml-2">{priceText}</p>
       </div>
 
       <div className="mt-4">

@@ -21,6 +21,7 @@ import type { Property } from "@/types/property";
 import React, { useState } from "react";
 import { getAuth } from "firebase/auth";
 import toast from "react-hot-toast";
+import { Textarea } from "@/components/ui/textarea";
 
 interface AddListingProps {
   trigger: React.ReactNode;
@@ -40,7 +41,7 @@ export function AddListing({ trigger, onAddListing }: AddListingProps) {
     forRent: false,
     forSale: false,
     leaseTerm: "",
-    propertyType: "apartment" as const,
+    propertyType: "" as const,
     rentPrice: "" as string | number,
     salePrice: "" as string | number,
     status: "available" as const,
@@ -60,6 +61,7 @@ export function AddListing({ trigger, onAddListing }: AddListingProps) {
     ? ["available", "sold", "pending"]
     : ["available"];
 
+    const locationOptions = ["Addis Ababa", "Bole", "Kazanchis", "CMC", "Megenagna", "Piassa", "Mexico", "Bahir Dar", "Merkato"]
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -78,7 +80,7 @@ export function AddListing({ trigger, onAddListing }: AddListingProps) {
     const payload: Partial<Property> = {
       title: formData.title.trim(),
       description: formData.description.trim(),
-      location: formData.location.trim(),
+      location: formData.location as Property["location"],
       propertyType: formData.propertyType as Property["propertyType"],
       area: Number(formData.area) || 0,
       bedrooms: Number(formData.bedrooms) || 0,
@@ -119,7 +121,7 @@ export function AddListing({ trigger, onAddListing }: AddListingProps) {
         forRent: false,
         forSale: false,
         leaseTerm: "",
-        propertyType: "apartment",
+        propertyType: "",
         rentPrice: "",
         salePrice: "",
         status: "available",
@@ -163,13 +165,21 @@ export function AddListing({ trigger, onAddListing }: AddListingProps) {
             {/* Location */}
             <div className="grid gap-2">
               <Label htmlFor="location">Location</Label>
-              <Input id="location" value={formData.location} onChange={(e) => handleChange("location", e.target.value)} required />
+              {/* <Input id="location" value={formData.location} onChange={(e) => handleChange("location", e.target.value)} required /> */}
+            <Select onValueChange={(v)=> handleChange("location", v as typeof formData.location)} value={formData.location}>
+              <SelectTrigger className="w-full"><SelectValue/></SelectTrigger>
+              <SelectContent>
+                {locationOptions.map((t)=>(
+                  <SelectItem key={t} value={t}>{t}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             </div>
 
             {/* Description */}
             <div className="grid gap-2 col-span-2">
               <Label htmlFor="description">Description</Label>
-              <Input id="description" value={formData.description} onChange={(e) => handleChange("description", e.target.value)} />
+<Textarea id="description" value={formData.description} onChange={(e)=>handleChange("description", e.target.value)}/>
             </div>
 
             {/* Area */}
@@ -182,7 +192,7 @@ export function AddListing({ trigger, onAddListing }: AddListingProps) {
             <div className="grid gap-2">
               <Label>Property Type</Label>
               <Select onValueChange={(v) => handleChange("propertyType", v as typeof formData.propertyType)} value={formData.propertyType}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {propertyTypes.map((t) => (
                     <SelectItem key={t} value={t}>

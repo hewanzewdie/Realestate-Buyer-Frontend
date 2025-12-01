@@ -25,6 +25,9 @@ import RealtorListings from "./pages/realtor/listing/MyListing.tsx";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import RealtorDashboard from "./pages/realtor/dashboard/index.tsx";
 import SellerListings from "./pages/realtor/listing/MyListing.tsx";
+import About from "./pages/public/landing/About.tsx";
+import { Services } from "./pages/public/landing/Services.tsx";
+import { Skeleton } from "./components/ui/skeleton.tsx";
 
 const Root = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -50,7 +53,31 @@ const Root = () => {
   }, []);
 
   if (loading) {
-    return <div className="text-2xl font-bold">Loading...</div>;
+    return (
+      <div className="w-full flex flex-col min-h-full">
+        <Skeleton className="w-full h-16"/>
+
+      <div className="w-full flex flex-col md:flex-row p-10 py-20 justify-between gap-10">
+      <div className="flex-1 space-y-6">
+
+        <Skeleton className="h-8 w-3/4" />
+        <Skeleton className="h-10 w-3/4" />
+        <Skeleton className="h-10 w-4/5" />
+        <div className="space-y-3">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-full" />
+        </div>
+
+        <Skeleton className="h-10 w-36 rounded-md" />
+      </div>
+
+      <div className="flex-1 flex justify-center">
+        <Skeleton className="h-100 w-full md:w-[80%] rounded-2xl" />
+      </div>
+    </div>
+    </div>
+    )
   }
 
   return (
@@ -126,6 +153,18 @@ const Root = () => {
 </AuthRoute>
           } 
           />  
+          <Route
+          path="/about"
+          element={
+            <About/>
+          }
+            />
+            <Route
+          path="/services"
+          element={
+            <Services/>
+          }
+            />
         </Route>
       </Routes>
     </Router>

@@ -2,7 +2,7 @@ export interface Property {
   id: string;
   title: string;
   description: string;
-  propertyType?: 'apartment' | 'house' | 'condo' | 'townhouse' | 'land' | 'commercial';
+  propertyType: 'apartment' | 'house' | 'condo' | 'townhouse' | 'land' | 'commercial';
   bedrooms: number;
   bathrooms:number;
   area: number;

@@ -5,6 +5,8 @@ import PropertyCard from "../../../components/listings/ListingCard";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
 import { AddListing } from "./AddListing";
+import { Skeleton } from "@/components/ui/skeleton";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 
 export default function SellerListings() {
 const [properties, setProperties] = useState<Property[]>([]);
@@ -12,10 +14,24 @@ const [loading, setLoading] = useState(true);
 
 const api = import.meta.env.VITE_API_URL;
 const user = getAuth().currentUser;
+const [role, setRole] = useState<string | null>(null);
+ const db = getFirestore();
 
 const handleAddListing = (newProperty: Property) => {
 setProperties((prev) => [...prev, newProperty]);
 };
+
+useEffect(() => {
+    const fetchRole = async () => {
+      if (!user) return;
+      const ref = doc(db, "users", user.uid);
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        setRole(snap.data().role); // "buyer" or "seller"
+      }
+    };
+    fetchRole();
+  }, [user,db]);
 
 useEffect(() => {
 if (!user) return;
@@ -41,7 +57,28 @@ setLoading(false);
 fetchListings();
 }, [user, api]); 
 
-if (loading) return <p className="text-center py-10 text-gray-500">Loading...</p>;
+if (loading) {
+  return (
+    <div className="pt-10 px-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+      {[...Array(3)].map((_, i) => (
+        <div
+          key={i}
+          className="rounded-lg shadow-sm "
+        >
+          <Skeleton className="w-full h-44" />
+
+          <div className="p-5 space-y-4">
+            <Skeleton className="h-6 w-4/5 rounded-lg" />
+            <Skeleton className="h-4 w-full rounded" />
+            <Skeleton className="h-4 w-3/4 rounded" />
+
+              <Skeleton className="h-8 w-8 rounded-full" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 if (properties.length === 0)
 return (

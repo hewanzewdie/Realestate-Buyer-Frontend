@@ -7,6 +7,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../../components/ui/select";
+// import {
+//   Pagination,
+//   PaginationContent,
+//   PaginationEllipsis,
+//   PaginationItem,
+//   PaginationLink,
+//   PaginationNext,
+//   PaginationPrevious,
+// } from "@/components/ui/pagination"
 import { useState } from "react";
 import { useFavorites } from "../../../hooks/useFavorites";
 
@@ -39,7 +48,7 @@ export default function Listings() {
   };
 
   return (
-    <div className="p-10 flex flex-col space-y-5">
+    <div className="p-10 flex flex-col space-y-5 bg-gray-50">
       <p className="text-2xl font-semibold">Listings</p>
 
       {/* Sale/Rent buttons */}
@@ -122,8 +131,8 @@ export default function Listings() {
                 <SelectItem value="Kazanchis">Kazanchis</SelectItem>
                 <SelectItem value="CMC">CMC</SelectItem>
                 <SelectItem value="Megenagna">Megenagna</SelectItem>
-                <SelectItem value="Piazza">Piazza</SelectItem>
-                <SelectItem value="Gelan">Gelan</SelectItem>
+                <SelectItem value="Piassa">Piassa</SelectItem>
+                <SelectItem value="Mexico">Mexico</SelectItem>
                 <SelectItem value="Bahir Dar">Bahir Dar</SelectItem>
                 <SelectItem value="Merkato">Merkato</SelectItem>
               </SelectContent>

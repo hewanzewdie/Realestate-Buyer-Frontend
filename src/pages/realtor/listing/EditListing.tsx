@@ -21,6 +21,7 @@ import type { Property } from "@/types/property";
 import React, { useState, useEffect } from "react";
 import { getAuth } from "firebase/auth";
 import toast from "react-hot-toast";
+import { Textarea } from "@/components/ui/textarea";
 
 interface EditListingProps {
   trigger: React.ReactNode;
@@ -41,7 +42,7 @@ export default function EditListing({ trigger, property, onUpdate }: EditListing
     forRent: property.forRent || false,
     forSale: property.forSale || false,
     leaseTerm: property.leaseTerm || "",
-    propertyType: property.propertyType || "apartment",
+    propertyType: property.propertyType || "",
     rentPrice: property.rentPrice?.toString() || "",
     salePrice: property.salePrice?.toString() || "",
     status: property.status || "available",
@@ -59,16 +60,27 @@ export default function EditListing({ trigger, property, onUpdate }: EditListing
       forRent: property.forRent || false,
       forSale: property.forSale || false,
       leaseTerm: property.leaseTerm || "",
-      propertyType: property.propertyType || "apartment",
+      propertyType: property.propertyType || "",
       rentPrice: property.rentPrice?.toString() || "",
       salePrice: property.salePrice?.toString() || "",
       status: property.status || "available",
     });
   }, [property]);
   const [isLoading, setIsLoading] = useState(false); 
-
+    const locationOptions = ["Addis Ababa", "Bole", "Kazanchis", "CMC", "Megenagna", "Piassa", "Mexico", "Bahir Dar", "Merkato"]
   const propertyTypes = ["apartment", "commercial", "house", "condo", "townhouse", "land"];
-
+<div className="grid gap-2">
+              <Label htmlFor="location">Location</Label>
+              {/* <Input id="location" value={formData.location} onChange={(e) => handleChange("location", e.target.value)} required /> */}
+            <Select onValueChange={(v)=> handleChange("location", v as typeof formData.location)} value={formData.location}>
+              <SelectTrigger className="w-full"><SelectValue/></SelectTrigger>
+              <SelectContent>
+                {locationOptions.map((t)=>(
+                  <SelectItem key={t} value={t}>{t}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            </div>
   const handleChange = <T extends keyof typeof formData>(field: T, value: typeof formData[T]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
@@ -92,7 +104,7 @@ export default function EditListing({ trigger, property, onUpdate }: EditListing
   const payload: Partial<Property> = {
     title: formData.title.trim(),
     description: formData.description.trim(),
-    location: formData.location.trim(),
+    location: formData.location as typeof formData.location,
     area: Number(formData.area) || 0,
     bedrooms: Number(formData.bedrooms) || 0,
     bathrooms: Number(formData.bathrooms) || 0,
@@ -179,23 +191,22 @@ export default function EditListing({ trigger, property, onUpdate }: EditListing
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="location">Location</Label>
-              <Input
-                id="location"
-                value={formData.location}
-                onChange={(e) => handleChange("location", e.target.value)}
-                required
-              />
-            </div>
+                          <Label htmlFor="location">Location</Label>
+                          {/* <Input id="location" value={formData.location} onChange={(e) => handleChange("location", e.target.value)} required /> */}
+                        <Select onValueChange={(v)=> handleChange("location", v as typeof formData.location)} value={formData.location}>
+                          <SelectTrigger className="w-full"><SelectValue/></SelectTrigger>
+                          <SelectContent>
+                            {locationOptions.map((t)=>(
+                              <SelectItem key={t} value={t}>{t}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        </div>
 
             {/* Description */}
             <div className="grid gap-2 col-span-2">
               <Label htmlFor="description">Description</Label>
-              <Input
-                id="description"
-                value={formData.description}
-                onChange={(e) => handleChange("description", e.target.value)}
-              />
+              <Textarea id="description" value={formData.description} onChange={(e)=>handleChange("description", e.target.value)}/>
             </div>
 
             {/* Area & Property Type */}

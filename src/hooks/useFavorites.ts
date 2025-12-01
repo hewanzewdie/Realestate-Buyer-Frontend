@@ -8,6 +8,7 @@ import {
   arrayRemove,
 } from "firebase/firestore";
 import { db } from "../../firebase";
+import toast from "react-hot-toast";
 
 export function useFavorites() {
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -47,7 +48,7 @@ export function useFavorites() {
     const user = auth.currentUser;
 
     if (!user) {
-      alert("Please log in to save favorites");
+      toast.error("Please login to save favorites");
       return;
     }
 
@@ -68,7 +69,7 @@ export function useFavorites() {
       }
     } catch (err) {
       console.error("Failed to update favorite:", err);
-      alert("Could not update favorites. Try again.");
+      toast.error("Could not update favorites. Try again.");
     }
   };
 
