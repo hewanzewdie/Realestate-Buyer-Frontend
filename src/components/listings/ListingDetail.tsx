@@ -5,7 +5,6 @@ import {
   MapPin,
   Ruler,
   MessageSquareText,
-  MessageCircleQuestionMark,
   PencilIcon,
   TrashIcon,
   ArrowLeft
@@ -48,7 +47,7 @@ export default function ListingDetail() {
         const ref = doc(db, "users", user.uid);
         const snap = await getDoc(ref);
         if (snap.exists()) {
-          setRole(snap.data().role); // "buyer" or "seller"
+          setRole(snap.data().role); 
         }
       };
       fetchRole();
@@ -62,7 +61,7 @@ export default function ListingDetail() {
     const [deleteDialogOpen, setDeleteDialogOpen] =useState(false);
 const [deleting, setDeleting] = useState(false);
   const handleDelete = async () => {
-  setDeleteDialogOpen(true); // Open the dialog instead of confirm()
+  setDeleteDialogOpen(true); 
 };
   
 
@@ -78,7 +77,6 @@ const confirmDelete = async () => {
     if (!res.ok) throw new Error("Failed to delete");
 
     toast.success("Property deleted successfully");
-navigate(-1);
   } catch (err) {
     console.error(err);
     toast.error("Failed to delete property");
@@ -222,11 +220,11 @@ navigate(-1);
             <div className="px-5 pb-5 flex justify-between items-center">
           {role === "seller" ? (
             <div className="flex gap-3">
-              {/* Edit Dialog */}
+              {/* Edit Modal */}
               <EditListing
                 trigger={
                   <Button
-                    onClick={(e) => e.stopPropagation()} // ← THIS IS KEY
+                    onClick={(e) => e.stopPropagation()} 
                     className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 bg-white transition"
                     title="Edit property"
                   >
@@ -251,7 +249,6 @@ navigate(-1);
 
             </div>
           ) : (
-            // Favorite for buyers
             <Button
               onClick={(e) => {
                 e.preventDefault();
@@ -269,15 +266,22 @@ navigate(-1);
             </Button>
           )}
         </div>
-                 <Button className="bg-white border border-gray-400 hover:bg-gray-100"><MessageSquareText className="cursor-pointer text-gray-700" /></Button>
-          <Button className="bg-white border border-gray-400 hover:bg-gray-100"><MessageCircleQuestionMark className="cursor-pointer text-gray-700" /></Button>
+        {user && role !== "seller" && property.sellerId !== user.uid && (
+          <Button
+            className="bg-white border border-gray-400 hover:bg-gray-100"
+            onClick={() => navigate(`/messages?propertyId=${property.id}&sellerId=${property.sellerId}`)}
+            title="Message seller"
+          >
+            <MessageSquareText className="cursor-pointer text-gray-700" />
+          </Button>
+        )}
         </div>
       </div>
       <div className="grid grid-cols-4 grid-rows-2 w-full h-86 mb-5 gap-2">
-        <div className="bg-green-400 col-start-1 col-end-3 row-start-1 row-end-3"></div>
-        <div className="bg-yellow-400 col-start-3 col-end-5 row-start-1 row-end-2"></div>
-        <div className="bg-red-400 col-start-3 col-end-4 row-start-2 row-end-3"></div>
-        <div className="bg-blue-400 col-start-4 col-end-5 row-start-2 row-end-3"></div>
+        <div className="bg-green-400 col-start-1 col-end-3 row-start-1 row-end-3"><img src="https://images.unsplash.com/photo-1649083048428-3d8ed23a3ce0?w=700&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fGhvdXNlJTIwaW50ZXJpb3J8ZW58MHx8MHx8fDA%3D" alt="" className="h-full w-full" /></div>
+        <div className="bg-yellow-400 col-start-3 col-end-5 row-start-1 row-end-2"><img src="https://images.unsplash.com/photo-1615873968403-89e068629265?w=700&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8aG91c2UlMjBpbnRlcmlvcnxlbnwwfHwwfHx8MA%3D%3D" alt="" className="w-full h-full" /></div>
+        <div className="bg-red-400 col-start-3 col-end-4 row-start-2 row-end-3"><img src="https://images.unsplash.com/photo-1649083048337-4aeb6dda80bb?w=700&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8aG91c2UlMjBpbnRlcmlvcnxlbnwwfHwwfHx8MA%3D%3D" alt="" className="h-full w-full" /></div>
+        <div className="bg-blue-400 col-start-4 col-end-5 row-start-2 row-end-3"><img src="https://images.unsplash.com/photo-1616593918824-4fef16054381?w=700&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fGhvdXNlJTIwaW50ZXJpb3J8ZW58MHx8MHx8fDA%3D" alt="" className="h-full w-full" /></div>
       </div>
 
       <div className="flex justify-between">
@@ -303,15 +307,6 @@ navigate(-1);
         </p>
         <p className="text-xl font-bold text-[#1bada2] ml-2">{priceText}</p>
       </div>
-
-      <div className="mt-4">
-        <h2 className="text-lg font-semibold">Location</h2>
-        <div className="bg-pink-300 h-86 rounded-lg">
-          <p className="p-4 text-center text-gray-700">
-            Map would be displayed here
-          </p>
-        </div>
-      </div>
       
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
   <DialogContent className="sm:max-w-md">
@@ -321,7 +316,7 @@ navigate(-1);
 
     <div className="py-4">
       <p className="text-gray-600">
-This action can't be undone      </p>
+This action can't be undone</p>
     </div>
 
     <DialogFooter className="gap-3 sm:gap-4">

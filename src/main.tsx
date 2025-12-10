@@ -7,27 +7,45 @@ import {
   Routes,
   Route,
   Navigate,
+  useNavigate,
 } from "react-router-dom";
 import AuthRoute from "./components/auth/AuthRoute.tsx";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Login from "./components/auth/Login.tsx";
 import Signup from "./components/auth/Signup.tsx";
-import reportWebVitals from "./reportWebVitals";
-import "../firebase";
 import Listings from "./pages/user/listings/Listings.tsx";
 import Favorites from "./pages/user/dashboard/Favorites.tsx";
 import Messages from "./pages/user/messaging/Messages.tsx";
 import ListingDetail from "./components/listings/ListingDetail.tsx";
 import Layout from "./components/common/Layout.tsx";
-import { SidebarProvider } from "./components/ui/sidebar.tsx";
-import { createUserProfile } from "./lib/createUserProfile.ts";
+import { SidebarProvider as SidebarProvider } from "./components/ui/sidebar.tsx";
 import RealtorListings from "./pages/realtor/listing/MyListing.tsx";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
 import RealtorDashboard from "./pages/realtor/dashboard/index.tsx";
 import SellerListings from "./pages/realtor/listing/MyListing.tsx";
 import About from "./pages/public/landing/About.tsx";
 import { Services } from "./pages/public/landing/Services.tsx";
 import { Skeleton } from "./components/ui/skeleton.tsx";
+import { Button } from "./components/ui/button.tsx";
+import { MessageCircle } from "lucide-react";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
+
+const FloatingMessageButton = () => {
+  const navigate = useNavigate();
+          const auth = getAuth();
+const user = auth.currentUser;
+  return (
+    <div className={`fixed bottom-6 right-6 z-50 ${user ? '' : 'hidden'}`}>
+      <Button
+        onClick={() => {
+          navigate("/messages");
+        }}
+        className="w-12 h-12 rounded-full bg-[#1bada2] hover:bg-[#169a8f] text-white shadow-2xl hover:scale-110"
+      >
+        <MessageCircle className="w-8 h-8" />
+      </Button>
+    </div>
+  );
+};
 
 const Root = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -37,18 +55,21 @@ const Root = () => {
   React.useEffect(() => {
     const auth = getAuth();
     const db = getFirestore();
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-         createUserProfile(user);
-         const docSnap = await getDoc(doc(db, "users", user.uid));
-         if (docSnap.exists()) {
+        const docSnap = await getDoc(doc(db, "users", user.uid));
+        if (docSnap.exists()) {
           setUserRole(docSnap.data().role);
-          }
-          setIsAuthenticated(true);
+        }
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+        setUserRole(null);
       }
-      setIsAuthenticated(!!user);
       setLoading(false);
     });
+
     return () => unsubscribe();
   }, []);
 
@@ -81,105 +102,63 @@ const Root = () => {
   }
 
   return (
-    <Router>
-      <Routes>
-        {/* Auth pages (no layout) */}
-        <Route
-          path="/login"
-          element={<Login setIsAuthenticated={setIsAuthenticated} />}
-        />
-        <Route
-          path="/signup"
-          element={<Signup setIsAuthenticated={setIsAuthenticated} />}
-        />
+    <Routes>
+      <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
+      <Route path="/signup" element={<Signup setIsAuthenticated={setIsAuthenticated} />} />
 
-        {/* All other pages with layout */}
-        <Route element={<Layout />}>
-          <Route path="/" element={<App />} />
-          <Route path="/listingDetail/:id" element={
-            <AuthRoute isAuthenticated={isAuthenticated}>
+      <Route element={<Layout />}>
+        <Route path="/" element={<App />} />
+        <Route path="/listingDetail/:id" element={
+          <AuthRoute isAuthenticated={isAuthenticated}>
             <ListingDetail />
-            </AuthRoute>
-            } />
-          <Route
-            path="/listings"
-            element={
-                userRole === "seller" ? (
-                  <AuthRoute isAuthenticated={isAuthenticated}>
-                    <SellerListings/>
-                    </AuthRoute>
-                ) : (
-                  <AuthRoute isAuthenticated={isAuthenticated}>
-                    <Listings />
-                  </AuthRoute>
-                )
-            }
-          />
-          <Route
-            path="/favorites"
-            element={
-              userRole === "seller" ? (
-                <Navigate to="/realtorDashboard" />
-              ) : (
-              <AuthRoute isAuthenticated={isAuthenticated}>
-                <Favorites />
-              </AuthRoute>
-              )
-            }
-          />
-          <Route
-            path="/messages"
-            element={
-              <AuthRoute isAuthenticated={isAuthenticated}>
-                <Messages />
-              </AuthRoute>
-            }
-          />
-          <Route path="*" element={<Navigate to="/" />} />
-
-          <Route 
-          path="/realtorListings" 
-          element={
+          </AuthRoute>
+        } />
+        <Route path="/listings" element={
+          <AuthRoute isAuthenticated={isAuthenticated}>
+            {userRole === "seller" ? <SellerListings /> : <Listings />}
+          </AuthRoute>
+        } />
+        <Route path="/favorites" element={
+          userRole === "seller" ? (
+            <Navigate to="/realtorDashboard" />
+          ) : (
             <AuthRoute isAuthenticated={isAuthenticated}>
-              <RealtorListings />
+              <Favorites />
             </AuthRoute>
-          } 
-          />
-          <Route 
-          path="/realtorDashboard" 
-          element={
-            <AuthRoute isAuthenticated={isAuthenticated}>
-<RealtorDashboard/>
-</AuthRoute>
-          } 
-          />  
-          <Route
-          path="/about"
-          element={
-            <About/>
-          }
-            />
-            <Route
-          path="/services"
-          element={
-            <Services/>
-          }
-            />
-        </Route>
-      </Routes>
-    </Router>
+          )
+        } />
+        <Route path="/messages" element={
+          <AuthRoute isAuthenticated={isAuthenticated}>
+            <Messages />
+          </AuthRoute>
+        } />
+        <Route path="/realtorListings" element={
+          <AuthRoute isAuthenticated={isAuthenticated}>
+            <RealtorListings />
+          </AuthRoute>
+        } />
+        <Route path="/realtorDashboard" element={
+          <AuthRoute isAuthenticated={isAuthenticated}>
+            <RealtorDashboard />
+          </AuthRoute>
+        } />
+        <Route path="/about" element={<About />} />
+        <Route path="/services" element={<Services />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Route>
+    </Routes>
   );
 };
 
-const root = ReactDOM.createRoot(
-  document.getElementById("root") as HTMLElement
-);
+const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
+
 root.render(
   <StrictMode>
     <SidebarProvider>
-      <Root />
+      <Router>
+        <Root />
+        <FloatingMessageButton /> 
+      </Router>
     </SidebarProvider>
   </StrictMode>
 );
-
-reportWebVitals();

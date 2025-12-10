@@ -1,10 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
-import { SendHorizontal, Menu, X, User } from "lucide-react";
+import {  Menu, X, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import logo from "../../assets/logo.png";
 import { Button } from "../ui/button";
-import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
-import { doc, getDoc, getFirestore } from "firebase/firestore";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import {db, auth} from '../../../firebase'
 
 export default function NavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -14,13 +15,10 @@ export default function NavBar() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const auth = getAuth();
-    const db = getFirestore();
     const unsub = onAuthStateChanged(auth, async (user) => {
       setIsAuthenticated(!!user);
 
       if (user) {
-        // Fetch user data from Firestore
         const userDoc = doc(db, "users", user.uid);
         const docSnap = await getDoc(userDoc);
         if (docSnap.exists()) {
@@ -35,7 +33,6 @@ export default function NavBar() {
   }, []);
 
   const handleLogout = async () => {
-    const auth = getAuth();
     await signOut(auth);
     navigate("/login");
   };
@@ -53,50 +50,40 @@ export default function NavBar() {
       {/* Desktop Nav */}
       {!isMenuOpen && (
         <header className="flex items-center justify-between p-4 sticky top-0 z-50 bg-green-50 shadow-md">
-          <img src={logo} alt="logo" className="w-10" />
+          <Link to="/"><img src={logo} alt="logo" className="w-10" /></Link>
 
-          {/* Desktop Links */}
           <div className="hidden md:flex space-x-5">
               <Link to="/" className="hover:underline hover:text-[#1bada2]">Home</Link>
              <Link to="/about" className="hover:underline hover:text-[#1bada2]">About</Link>
               <Link to="/services" className="hover:underline hover:text-[#1bada2]">Services</Link>
                   
             {isAuthenticated && (
-              <>
-               {/* <Link to="/favorites" className="hover:underline hover:text-[#1bada2]">Favorites</Link> */}
                 <Link to="/listings" className="hover:underline hover:text-[#1bada2]">Listings</Link>
-</>
             )}
           </div>
 
-          {/* Desktop Right Side */}
           <div className="hidden md:flex space-x-4 items-center relative">
             {isAuthenticated ? (
               <>
-                {/* <Link to="/messages">
-                  <SendHorizontal className="w-6 h-6 hover:text-[#1bada2]" />
-                </Link> */}
-
-                {/* Profile Dropdown */}
                 <div className="relative">
                   <Button
-                    className="flex items-center space-x-2 p-1.5 rounded-lg bg-[#1bada2] text-white"
+                    className="flex items-center space-x-2 p-1.5 rounded-full shadow-xl bg-[#1bada2] text-white"
                     onClick={() => setIsProfileOpen((prev) => !prev)}
                   >
                     <User className="w-5 h-5" />
-                    <span>{userProfile.name || "Profile"}</span>
                   </Button>
 
                   {isProfileOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg p-3 z-50">
+                    <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg p-3 z-50 space-y-1 flex flex-col">
                       <p className="font-semibold">{userProfile.name}</p>
                       <p className="text-sm">{userProfile.email}</p>
                       <p className="text-sm">{userProfile.phone}</p>
+                      <Button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white p-1.5 rounded-lg self-center w-full">Logout</Button>
+
                     </div>
                   )}
                 </div>
 
-                <Button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white p-1.5 w-20 rounded-lg">Logout</Button>
               </>
             ) : (
               <>
@@ -106,14 +93,13 @@ export default function NavBar() {
             )}
           </div>
 
-          {/* Mobile menu toggle */}
           <Button className="md:hidden bg-[#1bada2]" onClick={() => setIsMenuOpen(true)}>
             <Menu />
           </Button>
         </header>
       )}
 
-      {/* Mobile Menu */}
+      {/* Mobile Nav */}
       {isMenuOpen && (
         <header className="flex p-4 bg-green-50 backdrop-blur-md w-full sticky top-0 z-50 shadow">
           <div className="w-full">
@@ -129,11 +115,7 @@ export default function NavBar() {
                   <Link to="/" onClick={() => setIsMenuOpen(false)} className="hover:underline hover:text-[#1bada2]">Home</Link>
                   <Link to="/about" onClick={() => setIsMenuOpen(false)} className="hover:underline hover:text-[#1bada2]">About</Link>
                   <Link to="/services" onClick={()=>setIsMenuOpen(false)} className="hover:underline hover:text-[#1bada2]">Services</Link>
-                  <Link to="/listings" onClick={() => setIsMenuOpen(false)} className="hover:underline hover:text-[#1bada2]">Listings</Link>
-                  {/* <Link to="/favorites" onClick={() => setIsMenuOpen(false)} className="hover:underline hover:text-[#1bada2]">Favorites</Link> */}
-                  <Link to="/messages" onClick={() => setIsMenuOpen(false)} className="hover:text-[#1bada2]">
-                    <SendHorizontal className="w-6 h-6" />
-                  </Link>
+                  <Link to="/listings" onClick={() => setIsMenuOpen(false)} className="hover:underline hover:text-[#1bada2]">Listings</Link>                  
 
                   {/* Mobile Profile */}
                   <div className="flex flex-col gap-1 bg-white shadow-lg rounded-lg p-3 mt-2">

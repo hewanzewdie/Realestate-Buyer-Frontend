@@ -1,9 +1,8 @@
-// src/components/listings/PropertyList.tsx (or wherever it is)
 import PropertyCard from "../../../components/listings/ListingCard";
 import type { Property } from "../../../types/property";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 
 export type ListingFilters = {
@@ -51,15 +50,13 @@ function PropertyList(props: { filters?: ListingFilters; showOnly?: number }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Auth + Role state
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<string | null>(null);
 
   const api = import.meta.env.VITE_API_URL;
   const auth = getAuth();
   const db = getFirestore();
 
-  // Listen to auth + fetch role
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
@@ -82,9 +79,8 @@ function PropertyList(props: { filters?: ListingFilters; showOnly?: number }) {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [auth, db]);
 
-  // Fetch properties
   useEffect(() => {
     const fetchProperties = async () => {
       try {
@@ -96,12 +92,10 @@ function PropertyList(props: { filters?: ListingFilters; showOnly?: number }) {
 
         const data: Property[] = await response.json();
 
-        // ROLE-BASED FILTER: Only show seller's own properties if logged in as seller
         if (user && role?.toLowerCase() === "seller") {
           const sellerOnly = data.filter((p) => p.sellerId === user.uid);
           setAllProperties(sellerOnly);
         } else {
-          // Buyer or guest → show all
           setAllProperties(data);
         }
       } catch (err) {
@@ -113,15 +107,13 @@ function PropertyList(props: { filters?: ListingFilters; showOnly?: number }) {
     };
 
     fetchProperties();
-  }, [api, user, role]); // Re-fetch when user or role changes
+  }, [api, user, role]); 
 
-  // Apply search filters (price, type, location, etc.)
   const filtered = applyFilters(allProperties, props.filters ?? {});
   const displayProperties = props.showOnly
     ? filtered.slice(0, props.showOnly)
     : filtered;
 
-  // Loading state
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

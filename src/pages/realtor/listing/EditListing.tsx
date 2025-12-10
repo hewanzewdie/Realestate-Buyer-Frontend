@@ -26,7 +26,7 @@ import { Textarea } from "@/components/ui/textarea";
 interface EditListingProps {
   trigger: React.ReactNode;
   property: Property;
-  onUpdate: (updatedProperty: Property) => void; // callback after successful edit
+  onUpdate: (updatedProperty: Property) => void; 
 }
 
 export default function EditListing({ trigger, property, onUpdate }: EditListingProps) {
@@ -48,7 +48,6 @@ export default function EditListing({ trigger, property, onUpdate }: EditListing
     status: property.status || "available",
   });
 
-  // Sync form when property prop changes (e.g. different property opened)
   useEffect(() => {
     setFormData({
       title: property.title || "",
@@ -71,7 +70,6 @@ export default function EditListing({ trigger, property, onUpdate }: EditListing
   const propertyTypes = ["apartment", "commercial", "house", "condo", "townhouse", "land"];
 <div className="grid gap-2">
               <Label htmlFor="location">Location</Label>
-              {/* <Input id="location" value={formData.location} onChange={(e) => handleChange("location", e.target.value)} required /> */}
             <Select onValueChange={(v)=> handleChange("location", v as typeof formData.location)} value={formData.location}>
               <SelectTrigger className="w-full"><SelectValue/></SelectTrigger>
               <SelectContent>
@@ -125,29 +123,24 @@ export default function EditListing({ trigger, property, onUpdate }: EditListing
       body: JSON.stringify(payload),
     });
 
-    // THIS IS THE KEY PART
     const contentType = res.headers.get("content-type");
     let data;
 
     if (contentType && contentType.includes("application/json")) {
       data = await res.json();
     } else {
-      // Backend returned plain text → read it as text
       const text = await res.text();
       console.warn("Backend returned non-JSON:", text);
       if (!res.ok) throw new Error(text || "Update failed");
-      // Assume success if status is 200-299 even without JSON
-      data = property; // fallback – keep old data or refetch later
+      data = property;
     }
 
     if (!res.ok) {
       throw new Error(data.message || data || "Failed to update property");
     }
 
-    // Success → close dialog + update UI
-    onUpdate("object" in data ? data : { ...property, ...payload }); // merge if no full object returned
+    onUpdate("object" in data ? data : { ...property, ...payload }); 
     toast.success("Property updated!");
-    // Close dialog programmatically (shadcn way)
     document.getElementById("close-edit-dialog")?.click();
     setIsLoading(false)
   } catch (error: unknown) {
@@ -180,7 +173,6 @@ export default function EditListing({ trigger, property, onUpdate }: EditListing
           </DialogHeader>
 
           <div className="grid md:grid-cols-2 gap-6 py-4">
-            {/* Title & Location */}
             <div className="grid gap-2">
               <Label htmlFor="title">Title</Label>
               <Input
@@ -192,7 +184,6 @@ export default function EditListing({ trigger, property, onUpdate }: EditListing
             </div>
             <div className="grid gap-2">
                           <Label htmlFor="location">Location</Label>
-                          {/* <Input id="location" value={formData.location} onChange={(e) => handleChange("location", e.target.value)} required /> */}
                         <Select onValueChange={(v)=> handleChange("location", v as typeof formData.location)} value={formData.location}>
                           <SelectTrigger className="w-full"><SelectValue/></SelectTrigger>
                           <SelectContent>
@@ -203,13 +194,11 @@ export default function EditListing({ trigger, property, onUpdate }: EditListing
                         </Select>
                         </div>
 
-            {/* Description */}
             <div className="grid gap-2 col-span-2">
               <Label htmlFor="description">Description</Label>
               <Textarea id="description" value={formData.description} onChange={(e)=>handleChange("description", e.target.value)}/>
             </div>
 
-            {/* Area & Property Type */}
             <div className="grid gap-2">
               <Label htmlFor="area">Area (sq ft)</Label>
               <Input
@@ -235,7 +224,6 @@ export default function EditListing({ trigger, property, onUpdate }: EditListing
               </Select>
             </div>
 
-            {/* Bedrooms & Bathrooms */}
             <div className="grid gap-2">
               <Label htmlFor="bedrooms">Bedrooms</Label>
               <Input
@@ -255,7 +243,6 @@ export default function EditListing({ trigger, property, onUpdate }: EditListing
               />
             </div>
 
-            {/* Listing Type */}
             <div className="col-span-2">
               <Label className="block mb-2">Listing Type</Label>
               <div className="flex gap-8">
@@ -278,7 +265,6 @@ export default function EditListing({ trigger, property, onUpdate }: EditListing
               </div>
             </div>
 
-            {/* Status */}
             {(formData.forRent || formData.forSale) && (
               <div className="grid gap-2 col-span-2 md:col-span-1">
                 <Label>Status</Label>
@@ -297,7 +283,6 @@ export default function EditListing({ trigger, property, onUpdate }: EditListing
               </div>
             )}
 
-            {/* Conditional Fields */}
             {formData.forRent && (
               <>
                 <div className="grid gap-2">

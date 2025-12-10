@@ -156,16 +156,13 @@ export function AddListing({ trigger, onAddListing }: AddListingProps) {
           </DialogHeader>
 
           <div className="grid md:grid-cols-2 gap-6 py-4">
-            {/* Title */}
             <div className="grid gap-2">
               <Label htmlFor="title">Title</Label>
               <Input id="title" value={formData.title} onChange={(e) => handleChange("title", e.target.value)} required />
             </div>
 
-            {/* Location */}
             <div className="grid gap-2">
               <Label htmlFor="location">Location</Label>
-              {/* <Input id="location" value={formData.location} onChange={(e) => handleChange("location", e.target.value)} required /> */}
             <Select onValueChange={(v)=> handleChange("location", v as typeof formData.location)} value={formData.location}>
               <SelectTrigger className="w-full"><SelectValue/></SelectTrigger>
               <SelectContent>
@@ -176,19 +173,16 @@ export function AddListing({ trigger, onAddListing }: AddListingProps) {
             </Select>
             </div>
 
-            {/* Description */}
             <div className="grid gap-2 col-span-2">
               <Label htmlFor="description">Description</Label>
 <Textarea id="description" value={formData.description} onChange={(e)=>handleChange("description", e.target.value)}/>
             </div>
 
-            {/* Area */}
             <div className="grid gap-2">
               <Label htmlFor="area">Area (sq ft)</Label>
               <Input id="area" type="number" value={formData.area} onChange={(e) => handleChange("area", e.target.value)} />
             </div>
 
-            {/* Property Type */}
             <div className="grid gap-2">
               <Label>Property Type</Label>
               <Select onValueChange={(v) => handleChange("propertyType", v as typeof formData.propertyType)} value={formData.propertyType}>
@@ -203,7 +197,6 @@ export function AddListing({ trigger, onAddListing }: AddListingProps) {
               </Select>
             </div>
 
-            {/* Bedrooms & Bathrooms */}
             <div className="grid gap-2">
               <Label htmlFor="bedrooms">Bedrooms</Label>
               <Input id="bedrooms" type="number" value={formData.bedrooms} onChange={(e) => handleChange("bedrooms", e.target.value)} />
@@ -214,7 +207,6 @@ export function AddListing({ trigger, onAddListing }: AddListingProps) {
               <Input id="bathrooms" type="number" value={formData.bathrooms} onChange={(e) => handleChange("bathrooms", e.target.value)} />
             </div>
 
-            {/* Listing Type */}
             <div className="col-span-2 space-y-4">
               <Label>Listing Type</Label>
               <div className="flex gap-8">
@@ -229,7 +221,6 @@ export function AddListing({ trigger, onAddListing }: AddListingProps) {
               </div>
             </div>
 
-            {/* Status */}
             {(formData.forRent || formData.forSale) && (
               <div className="grid gap-2">
                 <Label>Status</Label>
@@ -244,7 +235,6 @@ export function AddListing({ trigger, onAddListing }: AddListingProps) {
               </div>
             )}
 
-            {/* Conditional Fields */}
             {formData.forRent && (
               <>
                 <div className="grid gap-2">
@@ -273,9 +263,9 @@ export function AddListing({ trigger, onAddListing }: AddListingProps) {
             <Button
               type="submit"
               className="bg-[#1bada2] hover:bg-teal-700 text-white"
-              disabled={isLoading} // 👈 Disable while loading
+              disabled={isLoading} 
             >
-              {isLoading ? 'Saving...' : 'Save Listing'} {/* 👈 Loading text */}
+              {isLoading ? 'Saving...' : 'Save Listing'}
             </Button>
           </DialogFooter>
         </form>

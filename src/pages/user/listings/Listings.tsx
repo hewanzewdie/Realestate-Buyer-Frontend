@@ -7,15 +7,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../../components/ui/select";
-// import {
-//   Pagination,
-//   PaginationContent,
-//   PaginationEllipsis,
-//   PaginationItem,
-//   PaginationLink,
-//   PaginationNext,
-//   PaginationPrevious,
-// } from "@/components/ui/pagination"
 import { useState } from "react";
 import { useFavorites } from "../../../hooks/useFavorites";
 
@@ -51,7 +42,6 @@ export default function Listings() {
     <div className="p-10 flex flex-col space-y-5 bg-gray-50">
       <p className="text-2xl font-semibold">Listings</p>
 
-      {/* Sale/Rent buttons */}
       <div className="flex space-x-3">
         <Button
           className={`p-1.5 w-16 rounded-md ${
@@ -85,10 +75,8 @@ export default function Listings() {
         </Button>
       </div>
 
-      {/* Filters */}
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5">
-        <div className="flex flex-col md:flex-row md:space-x-5 gap-5">
-          {/* Min Price */}
+        <div className="flex flex-col md:flex-row flex-wrap md:space-x-5 gap-5">
           <div className="flex flex-col space-y-2">
             <p>Min price</p>
             <Select onValueChange={(v) => setMinPrice(Number(v))}>
@@ -103,7 +91,6 @@ export default function Listings() {
             </Select>
           </div>
 
-          {/* Max Price */}
           <div className="flex flex-col space-y-2">
             <p>Max price</p>
             <Select onValueChange={(v) => setMaxPrice(Number(v))}>
@@ -118,7 +105,6 @@ export default function Listings() {
             </Select>
           </div>
 
-          {/* Location */}
           <div className="flex flex-col space-y-2">
             <p>Location</p>
             <Select onValueChange={(v) => setLocation(v)}>
@@ -139,7 +125,6 @@ export default function Listings() {
             </Select>
           </div>
 
-          {/* Property Type */}
           <div className="flex flex-col space-y-2">
             <p>Property type</p>
             <Select onValueChange={(v) => setPropertyType(v as typeof propertyType)}>
@@ -156,7 +141,6 @@ export default function Listings() {
             </Select>
           </div>
 
-          {/* Clear Filters */}
           <Button
             onClick={clearFilters}
             className="bg-[#1bada2] p-1 w-full self-end md:w-40 rounded-lg text-white"
@@ -166,7 +150,6 @@ export default function Listings() {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="flex space-x-5">
         <button
           onClick={() => setActiveTab("all")}
@@ -190,7 +173,6 @@ export default function Listings() {
         </button>
       </div>
 
-      {/* Listings */}
       <div>
         {favoritesLoading ? (
           <div className="text-center py-8">Loading...</div>

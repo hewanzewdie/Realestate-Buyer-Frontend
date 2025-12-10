@@ -1,19 +1,15 @@
-// src/pages/Landing.tsx
 import Listing from "../listing/Listing";
-import { HouseIcon, HouseHeart, ShoppingBag, MessageCircle, ChevronDown, ChevronUp, ArrowRight } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { HouseIcon, HouseHeart, ShoppingBag, ChevronDown, ChevronUp, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "../../../components/ui/button";
 import { useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import toast from "react-hot-toast";
 
 export default function Landing() {
-  const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [visibleCount, setVisibleCount] = useState(3);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Only track authentication — no user/role/fetching here anymore
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
       setIsAuthenticated(!!user);
@@ -21,21 +17,12 @@ export default function Landing() {
     return () => unsubscribe();
   }, []);
 
-  const handleMessageClick = () => {
-    if (!isAuthenticated) {
-      toast.error("Please login to view messages.");
-      return;
-    }
-    navigate("/messages");
-  };
-
-  // Handle View More / Show Less — exactly as you had it
   const handleViewMore = () => {
     if (isExpanded) {
       setVisibleCount(3);
       setIsExpanded(false);
     } else {
-      setVisibleCount(999); // show all (or use a large number)
+      setVisibleCount(999); 
       setIsExpanded(true);
     }
     document.getElementById("listings")?.scrollIntoView({ behavior: "smooth" });
@@ -57,7 +44,7 @@ export default function Landing() {
             helping you find, sell, or rent properties across vibrant neighborhoods and growing markets.
           </p>
           <Link to='/about'>
-            <Button className="bg-[#1bada2] hover:bg-[#169a8f] text-white px-8 py-6 text-lg rounded-lg">
+            <Button className="bg-[#1bada2] hover:bg-[#169a8f] cursor-pointer text-white px-8 py-6 text-lg rounded-lg">
               Find out more
               <ArrowRight/>
             </Button>
@@ -107,14 +94,12 @@ export default function Landing() {
             Homes are available across Addis Ababa and beyond
           </p>
 
-          {/* Role-based filtering is now handled INSIDE the Listing component */}
           <Listing showOnly={visibleCount} />
 
-          {/* View More / Show Less Button — exactly as you wanted */}
-          <div className="flex justify-center mt-12">
+          <div className="flex justify-center mt-12 ">
             <Button
               onClick={handleViewMore}
-              className="bg-[#1bada2] hover:bg-[#169a8f] text-white px-10 py-6 text-lg rounded-lg font-medium transition-all shadow-lg"
+              className="bg-[#1bada2] hover:bg-[#169a8f] text-white cursor-pointer w-60 px-10 py-6 text-lg rounded-lg font-medium transition-all shadow-lg"
             >
               {isExpanded? <ChevronUp/>:<ChevronDown/>}
               {isExpanded ? "Show Less" : "View More Properties"}
@@ -123,7 +108,7 @@ export default function Landing() {
         </div>
       </div>
 
-      {/* Quote / CTA Section */}
+      {/* CTA Section */}
       <div className="relative h-96 md:h-[500px] flex items-center justify-center overflow-hidden">
         <img
           src="https://plus.unsplash.com/premium_photo-1661908377130-772731de98f6?w=1600&auto=format&fit=crop&q=80"
@@ -138,16 +123,7 @@ export default function Landing() {
             Find your next fortune here.
           </p>
           <Button className="mt-8 bg-[#1bada2] hover:bg-[#169a8f] text-white px-8 py-6 text-lg rounded-lg">
-            <Link to={isAuthenticated ? "/listings" : "/login"}>Find Property</Link>
-          </Button>
-        </div>
-      </div>
-
-      {/* Floating Message Button */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <div onClick={handleMessageClick}>
-          <Button className="w-12 h-12 hover:bg-[#169a8f] text-white bg-[#1bada2] rounded-full shadow-xl hover:scale-105 transition-transform">
-            <MessageCircle />
+            <Link to={isAuthenticated ? "/listings" : "/login"}>{isAuthenticated ? "Find Property": "Get Started"}</Link>
           </Button>
         </div>
       </div>

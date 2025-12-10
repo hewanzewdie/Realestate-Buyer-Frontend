@@ -1,126 +1,175 @@
-import logo from '../../assets/logo.png'
-import { Link, useNavigate } from 'react-router-dom';
-import { Switch } from '../ui/switch';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
+import logo from "../../assets/logo.png";
+import { Link, useNavigate } from "react-router-dom";
+import { Switch } from "../ui/switch";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 import { useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { createUserProfile } from '@/lib/createUserProfile';
-import { auth } from '../../../firebase';
-import  toast  from "react-hot-toast";
-import { ArrowLeft } from 'lucide-react';
+import { auth } from "../../../firebase";
+import toast from "react-hot-toast";
+import { ArrowLeft } from "lucide-react";
 
-export default function Signup({ setIsAuthenticated }: { setIsAuthenticated: (val: boolean) => void }) {
-    const navigate = useNavigate();
-    const [fullName, setFullName] = useState("");
-    const [email, setEmail] = useState("");
-    const [phone, setPhone] = useState("");
-    const [password, setPassword] = useState("");
-    const [isSeller, setIsSeller] = useState(false); 
-    const [authing, setAuthing] = useState(false);
-    const [error, setError] = useState("");
+const api = import.meta.env.VITE_API_URL;
 
-    const signUpWithEmail = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setAuthing(true);
-        setError("");
+export default function Signup({
+  setIsAuthenticated,
+}: {
+  setIsAuthenticated: (val: boolean) => void;
+}) {
+  const navigate = useNavigate();
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSeller, setIsSeller] = useState(false);
+  const [authing, setAuthing] = useState(false);
+  const [error, setError] = useState("");
 
-        try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
+  const safeJson = async (res: Response) => {
+    try {
+      return await res.json();
+    } catch {
+      return null;
+    }
+  };
 
-            const role = isSeller ? 'seller' : 'buyer';
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthing(true);
+    setError("");
 
-            await createUserProfile(user, {
-                name: fullName,
-                phone,
-                email,
-                role,
-                createdAt: new Date(),
-                favorites: [],
-                propertiesListed: []
-            });
+    try {
+      const { user } = await createUserWithEmailAndPassword(auth, email, password);
 
-            setIsAuthenticated(true);
-            toast.success('Successfully Signed Up!')
-            navigate("/");
-        } catch (error: any) {
-            setError(error.message);
-            setAuthing(false);
-        }
-    };
+      const checkRes = await fetch(`${api}/user/${user.uid}`);
+      if (checkRes.ok) {
+        setError("This email is already registered. Please log in.");
+        setAuthing(false);
+        return;
+      }
+      if (checkRes.status !== 404) {
+        const errData = await safeJson(checkRes);
+        throw new Error(errData?.error || "Server error");
+      }
 
-    return (
+      const createRes = await fetch(`${api}/add-user`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          name: fullName.trim() || null,
+          phone: phone || null,
+          role: isSeller ? "seller" : "buyer",
+        }),
+      });
+
+      if (!createRes.ok) {
+        const errData = await safeJson(createRes);
+        throw new Error(errData?.error || "Failed to create profile");
+      }
+
+      toast.success("Account created successfully!");
+      setIsAuthenticated(true);
+      navigate(isSeller ? "/realtorListings" : "/listings");
+    } catch (error) {
+      if(error instanceof Error){
+                setError(error.message);
+      }
+      else{
+        setError('something went wrong')
+      }
+      } finally {
+      setAuthing(false);
+    }
+  };
+
+  return (
     <>
-        <Button onClick={()=>navigate('/')} className="ml-10 mt-10 bg-gray-300 text-black hover:bg-gray-400"><ArrowLeft/></Button>
-        <div className="flex py-10 h-160 w-200 m-auto">
-            <div className='bg-[#50b6c1] w-1/2 hidden md:flex items-center justify-center sm:flex shadow-xl'>
-                <img src={logo} alt="Logo" className='w-40' />
-            </div>
+      <Button onClick={() => navigate("/")} className="ml-10 mt-10 bg-gray-300 text-black hover:bg-gray-400">
+        <ArrowLeft />
+      </Button>
 
-            <form 
-                onSubmit={signUpWithEmail} 
-                className='flex flex-col w-[90%] shadow-xl md:w-1/2 p-8 justify-center gap-3 sm:static sm:translate-x-0 sm:translate-y-0 
-                           relative left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 sm:left-0 sm:top-0'
-            >
-                <div className='flex justify-between items-center'>
-                    <p className='text-2xl font-bold text-[#50b6c1]'>Sign Up</p>
-                    <div className='flex space-x-2 items-center'>
-                        <p>Seller</p>
-                        <Switch checked={isSeller} onCheckedChange={setIsSeller} />
-                    </div>
-                </div>
-
-                {error && <p className="text-red-600 text-sm">{error}</p>}
-
-                <p>Full Name</p>
-                <Input
-                    type='text'
-                    placeholder='Enter your name'
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className='border border-gray-300 rounded-md p-2 mb-4'
-                />
-
-                <p>Email <span className='text-red-600 font-bold'>*</span></p>
-                <Input
-                    type="email"
-                    placeholder='Enter your email'
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className='border border-gray-300 rounded-md p-2 mb-4'
-                />
-
-                <p>Phone Number</p>
-                <Input
-                    type="tel"
-                    placeholder='Enter your phone number'
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className='border border-gray-300 rounded-md p-2 mb-4'
-                />
-
-                <p>Password <span className='text-red-600 font-bold'>*</span></p>
-                <Input
-                    type="password"
-                    placeholder='Enter your password'
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className='border border-gray-300 rounded-md p-2 mb-4'
-                />
-
-                <Button type="submit" className='bg-[#50b6c1] p-1.5 text-white rounded-md' disabled={authing}>
-                    {authing ? "Creating Account..." : "Sign Up"}
-                </Button>
-
-                <p className='text-center'>
-                    Already have an account?{" "}
-                    <Link to="/login" className='hover:underline text-blue-600'>Login</Link>
-                </p>
-            </form>
+      <div className="flex py-10 h-screen w-full max-w-5xl mx-auto">
+        <div className="bg-[#50b6c1] w-1/2 hidden md:flex items-center justify-center shadow-xl">
+          <img src={logo} alt="logo" className="w-40" />
         </div>
-        </>
-    );
+
+        <form onSubmit={handleSignup} className="flex flex-col w-full md:w-1/2 p-8 justify-center gap-4 bg-white shadow-xl">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-3xl font-bold text-[#50b6c1]">Sign Up</h2>
+            <div className="flex items-center gap-3">
+              <span className={isSeller ? "text-gray-500" : "font-medium"}>Buyer</span>
+              <Switch checked={isSeller} onCheckedChange={setIsSeller} />
+              <span className={isSeller ? "font-medium" : "text-gray-500"}>Seller</span>
+            </div>
+          </div>
+
+          {error && <p className="text-red-600 text-sm">{error}</p>}
+
+          <div>
+            <label>Full Name</label>
+            <Input
+              type="text"
+              placeholder="Enter your name"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              className="mt-1"
+            />
+          </div>
+
+          <div>
+            <label>Email <span className="text-red-600">*</span></label>
+            <Input
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="mt-1"
+            />
+          </div>
+
+          <div>
+            <label>Phone Number</label>
+            <Input
+              type="tel"
+              placeholder="0912 345 678"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="mt-1"
+            />
+          </div>
+
+          <div>
+            <label>Password <span className="text-red-600">*</span></label>
+            <Input
+              type="password"
+              placeholder="Create a password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+              className="mt-1"
+            />
+          </div>
+
+          <Button
+            type="submit"
+            disabled={authing}
+            className="bg-[#50b6c1] hover:bg-[#3a8a93] text-white font-medium py-6 text-lg"
+          >
+            {authing ? "Creating Account..." : "Sign Up"}
+          </Button>
+
+          <p className="text-center text-sm">
+            Already have an account?{" "}
+            <Link to="/login" className="text-blue-600 hover:underline font-medium">
+              Log in
+            </Link>
+          </p>
+        </form>
+      </div>
+    </>
+  );
 }

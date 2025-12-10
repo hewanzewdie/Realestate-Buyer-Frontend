@@ -10,7 +10,6 @@ export default function FavoritesPage() {
 
   const api = import.meta.env.VITE_API_URL;
   useEffect(() => {
-    // No user or no favorites
     if (loading) return;
     if (favorites.length === 0) {
       setProperties([]);

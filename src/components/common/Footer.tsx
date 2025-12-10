@@ -4,19 +4,20 @@ import { MailIcon, PhoneIcon, MapPinIcon } from 'lucide-react'
 
 export default function Footer() {
  
-  return (<footer className="bg-gray-900 text-gray-300">
+  return (
+  <footer className="bg-gray-900 text-gray-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
-<img src={logo} alt=""  className="w-16 h-16"/>
-<span className="text-lg font-semibold text-white">
+                <img src={logo} alt="logo"  className="w-16 h-16"/>
+                <span className="text-lg font-semibold text-white">
                 RealEstate
               </span>
             </div>
             <p className="text-sm text-gray-400">
               Ethiopia's trusted marketplace connecting property buyers and
-              sellers directly—no middleman, no commission.
+              sellers directly. No middleman, no commission.
             </p>
           </div>
 
@@ -36,7 +37,7 @@ export default function Footer() {
                   to="/about"
                   className="text-sm hover:text-teal-500 transition-colors"
                 >
-                  About Platform
+                  About
                 </Link>
               </li>
               <li>
@@ -78,11 +79,11 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-2 text-sm">
                 <PhoneIcon className="w-4 h-4 flex-shrink-0 text-teal-500" />
-                <span>+251 11 123 4567</span>
+                <a href="tel:+251001234567">+251 00 123 4567</a>
               </li>
               <li className="flex items-center gap-2 text-sm">
                 <MailIcon className="w-4 h-4 flex-shrink-0 text-teal-500" />
-                <span>support@realestate.et</span>
+                <a href="mailto:support@realestate.et">support@realestate.et</a>
               </li>
             </ul>
           </div>
@@ -90,7 +91,7 @@ export default function Footer() {
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
           <p>
-            &copy; {new Date().getFullYear()} RealEstate Platform. All rights
+            &copy; 2025 RealEstate Platform. All rights
             reserved.
           </p>
         </div>
@@ -98,4 +99,3 @@ export default function Footer() {
     </footer>
   )
 }
-

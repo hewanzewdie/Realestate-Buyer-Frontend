@@ -20,12 +20,11 @@ export function Services() {
       setIsLoggedIn(!!user)
     })
 
-    return () => unsubscribe() // Clean up listener
+    return () => unsubscribe() 
   }, [])
 
   return (
     <div>
-      {/* Hero Section */}
       <section className="bg-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
@@ -41,11 +40,10 @@ export function Services() {
         </div>
       </section>
 
-      {/* Main Features */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* For Buyers */}
+
             <div className="bg-white p-8 rounded-lg shadow-sm border">
               <div className="w-16 h-16 bg-teal-100 rounded-lg flex items-center justify-center mb-6">
                 <HomeIcon className="w-8 h-8 text-teal-600" />
@@ -70,7 +68,6 @@ export function Services() {
               </ul>
             </div>
 
-            {/* For Sellers */}
             <div className="bg-white p-8 rounded-lg shadow-sm border">
               <div className="w-16 h-16 bg-teal-100 rounded-lg flex items-center justify-center mb-6">
                 <KeyIcon className="w-8 h-8 text-teal-600" />
@@ -95,7 +92,6 @@ export function Services() {
               </ul>
             </div>
 
-            {/* Platform Security */}
             <div className="bg-white p-8 rounded-lg shadow-sm border">
               <div className="w-16 h-16 bg-teal-100 rounded-lg flex items-center justify-center mb-6">
                 <BuildingIcon className="w-8 h-8 text-teal-600" />
@@ -123,7 +119,6 @@ export function Services() {
         </div>
       </section>
 
-      {/* Additional Features */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -149,7 +144,6 @@ export function Services() {
         </div>
       </section>
 
-      {/* How It Works */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -181,7 +175,6 @@ export function Services() {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className={`py-20 bg-gradient-to-r from-teal-600 to-teal-700 text-white ${isLoggedIn? 'hidden': ''}`}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl font-bold mb-6">Ready to Join Our Platform?</h2>

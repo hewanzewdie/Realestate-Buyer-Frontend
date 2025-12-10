@@ -1,4 +1,3 @@
-// PropertyCard.tsx
 import { HeartIcon, BedIcon, BathIcon, Ruler, MapPin, PencilIcon, TrashIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useFavorites } from "../../hooks/useFavorites";
@@ -17,16 +16,15 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@radix-ui/react-label";
 import { Input } from "../ui/input";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import  toast  from "react-hot-toast";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
-import { createUserProfile } from "@/lib/createUserProfile";
+import { doc, getDoc } from "firebase/firestore";
+import {auth, db} from '../../../firebase'
 
 function PropertyCard(property: Property) {
   const { favorites, toggleFavorite } = useFavorites();
   const isFavorited = favorites.includes(property.id);
   
-  const auth = getAuth();
   const user = auth.currentUser;
   const [role, setRole] = useState<string | null>(null);
 
@@ -34,7 +32,6 @@ function PropertyCard(property: Property) {
 const [openLoginModal, setOpenLoginModal] = useState(false);
 const [openSignupModal, setOpenSignupModal] = useState(false);
 
-const db = getFirestore();
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
 
@@ -44,68 +41,102 @@ const db = getFirestore();
   const [phone, setPhone] = useState("");
   const [isSeller, setIsSeller] = useState(false); 
 
-
   const [authing, setAuthing] = useState(false);
   const [error, setError] = useState("");
-
-  const signInWithEmail = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAuthing(true);
-    setError("");
-
+const safeJson = async (res: Response) => {
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, loginEmail, loginPassword);
-      const user = userCredential.user;
-
-      // Fetch user role
-      const docRef = doc(db, "users", user.uid);
-      const docSnap = await getDoc(docRef);
-      const userData = docSnap.data();
-
-      if (userData?.role === "seller") {
-        toast.success("Welcome back, Seller!", {duration:5000});
-        navigate("/realtorListings");
-      } else {
-        toast.success("Welcome back, Buyer!");
-        navigate("/listings");
-      }
-
-    } catch (error: any) {
-      setError(error.message);
-      setAuthing(false);
+      return await res.json();
+    } catch {
+      return null;
     }
   };
+ const signInWithEmail = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setAuthing(true);
+  setError("");
+
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, loginEmail, loginPassword);
+    const user = userCredential.user;
+    const api = import.meta.env.VITE_API_URL;
+
+    const res = await fetch(`${api}/user/${user.uid}`);
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch user profile");
+    }
+
+    const userData = await res.json();
+
+    if (userData?.role === "seller") {
+      navigate("/realtorListings");
+    } else {
+      navigate("/listings");
+    }
+  } catch (error) {
+      if(error instanceof Error){
+                setError(error.message);
+      }
+      else{
+        setError('something went wrong')
+      }
+      setAuthing(false)
+      }
+};
 
   const signUpWithEmail = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setAuthing(true);
-        setError("");
+  e.preventDefault();
+  setAuthing(true);
+  setError("");
 
-        try {
-            const userCredential = await createUserWithEmailAndPassword(auth, signUpEmail, signUpPassword);
-            const user = userCredential.user;
+  try {
+    
+    const { user } = await createUserWithEmailAndPassword(auth, signUpEmail, signUpPassword);
+    const checkRes = await fetch(`http://localhost:3000/user/${user.uid}`);
+   if (checkRes.ok) {
+        setError("This email is already registered. Please log in.");
+        setAuthing(false);
+        return;
+      }
+   if (checkRes.status !== 404) {
+        const errData = await safeJson(checkRes);
+        throw new Error(errData?.error || "Server error");
+      }
+   
+    const createRes = await fetch(`http://localhost:3000/add-user`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          name: fullName.trim() || null,
+          phone: phone || null,
+          role: isSeller ? "seller" : "buyer",
+        }),
+      });
 
-            const role = isSeller ? 'seller' : 'buyer';
+   if (!createRes.ok) {
+        const errData = await safeJson(createRes);
+        throw new Error(errData?.error || "Failed to create profile");
+      }
 
-            await createUserProfile(user, {
-                name: fullName,
-                phone,
-                signUpEmail,
-                role,
-                createdAt: new Date(),
-                favorites: [],
-                propertiesListed: []
-            });
+      toast.success("Account created successfully!");
+      navigate(isSeller ? "/realtorListings" : "/listings");
 
-            toast.success('Successfully Signed Up!')
-            navigate("/");
-            setAuthing(false);
-        } catch (error: any) {
-            setError(error.message);
-            setAuthing(false);
-        }
-    };
+     }
 
+    catch (error) {
+      if(error instanceof Error){
+                setError(error.message);
+      }
+      else{
+        setError('something went wrong')
+      }
+      }
+    finally {
+      setAuthing(false);
+    }
+};
 const handleCardClick = () =>{
   if(!user){
     setOpenLoginModal(true);
@@ -121,11 +152,11 @@ const handleCardClick = () =>{
       const ref = doc(db, "users", user.uid);
       const snap = await getDoc(ref);
       if (snap.exists()) {
-        setRole(snap.data().role); // "buyer" or "seller"
+        setRole(snap.data().role);
       }
     };
     fetchRole();
-  }, [user,db]);
+  }, [user]);
 
   const handleUpdate = () => {
   window.location.reload();
@@ -134,7 +165,7 @@ const handleCardClick = () =>{
 const [deleteDialogOpen, setDeleteDialogOpen] =useState(false);
 const [deleting, setDeleting] = useState(false);
   const handleDelete = async () => {
-  setDeleteDialogOpen(true); // Open the dialog instead of confirm()
+  setDeleteDialogOpen(true); 
 };
 
 const confirmDelete = async () => {
@@ -149,7 +180,7 @@ const confirmDelete = async () => {
     if (!res.ok) throw new Error("Failed to delete");
 
     toast.success("Property deleted successfully");
-    window.location.reload(); // or better: remove from state
+    window.location.reload(); 
   } catch (err) {
     console.error(err);
     toast.error("Failed to delete property");
@@ -160,7 +191,7 @@ const confirmDelete = async () => {
 };
 
   return (
-    <div className="block">
+    <div className="block cursor-pointer">
       <div className="flex flex-col gap-3 w-full bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow">
         
         <div onClick={handleCardClick} className="block">
@@ -179,7 +210,6 @@ const confirmDelete = async () => {
             />
           </div>
 
-          {/* Content */}
           <div className="p-5">
               <h3 className="text-lg font-semibold">{property.title}</h3>
             
@@ -208,7 +238,7 @@ const confirmDelete = async () => {
               </p>
           </div>
         </div>
-
+{/* Login modal  */}
 <Dialog open={openLoginModal} onOpenChange={setOpenLoginModal}>
   <DialogContent>
     <form className="flex flex-col space-y-5" onSubmit={signInWithEmail}>
@@ -251,11 +281,12 @@ const confirmDelete = async () => {
     <DialogHeader>
       <DialogTitle>Signup</DialogTitle>
     </DialogHeader>
-                {error && <p className="text-red-600 text-sm">{error}</p>}
-                <div className='flex space-x-2 items-center self-end'>
-                        <p>Seller</p>
-                        <Switch checked={isSeller} onCheckedChange={setIsSeller} />
-                    </div>
+                <p className="text-red-600 text-sm">{error}</p>
+                    <div className='flex items-center gap-3 self-end'>
+              <span className={isSeller ? 'text-gray-500' : 'font-medium'}>Buyer</span>
+              <Switch checked={isSeller} onCheckedChange={setIsSeller} />
+              <span className={isSeller ? 'font-medium' : 'text-gray-500'}>Seller</span>
+            </div>
     <div>
       <Label htmlFor="name">Full Name</Label>
       <Input id="name" type="text" value={fullName} onChange={(e) => setFullName(e.target.value)}/>
@@ -290,15 +321,14 @@ Submit                </Button>
   </DialogContent>
 </Dialog>
 
-        {/* Action Buttons — Outside the Link */}
         <div className="px-5 pb-5 flex justify-between items-center">
           {role === "seller" ? (
             <div className="flex gap-3">
-              {/* Edit Dialog */}
+              {/* Edit Modal */}
               <EditListing
                 trigger={
                   <Button
-                    onClick={(e) => e.stopPropagation()} // ← THIS IS KEY
+                    onClick={(e) => e.stopPropagation()} 
                     className="p-2 rounded-lg border border-gray-300 hover:bg-gray-100 bg-green-50 transition"
                     title="Edit property"
                   >
@@ -323,7 +353,6 @@ Submit                </Button>
 
             </div>
           ) : (
-            // Favorite for buyers
             <Button
               onClick={(e) => {
                 e.preventDefault();
