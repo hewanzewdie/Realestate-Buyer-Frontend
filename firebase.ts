@@ -13,12 +13,12 @@ interface FirebaseConfig extends FirebaseOptions {
 }
 
 const firebaseConfig : FirebaseConfig ={
-  apiKey: "AIzaSyAfzVuHVBbvSH3EJkeulMPLnr3xGcE4koM",
-  authDomain: "real-estate-c8077.firebaseapp.com",
-  projectId: "real-estate-c8077",
-  storageBucket: "real-estate-c8077.firebasestorage.app",
-  messagingSenderId: "591882201882",
-  appId: "1:591882201882:web:25ee5ca35bb5417e2a5aa3"
+   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 const app = initializeApp(firebaseConfig);

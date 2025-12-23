@@ -1,1 +1,0 @@
-// Favorites tab & related logic

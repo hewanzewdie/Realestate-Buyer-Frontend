@@ -1,1 +1,0 @@
-// Single property detail page

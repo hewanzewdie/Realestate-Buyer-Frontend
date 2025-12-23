@@ -14,13 +14,11 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Login from "./components/auth/Login.tsx";
 import Signup from "./components/auth/Signup.tsx";
 import Listings from "./pages/user/listings/Listings.tsx";
-import Favorites from "./pages/user/dashboard/Favorites.tsx";
 import Messages from "./pages/user/messaging/Messages.tsx";
 import ListingDetail from "./components/listings/ListingDetail.tsx";
 import Layout from "./components/common/Layout.tsx";
 import { SidebarProvider as SidebarProvider } from "./components/ui/sidebar.tsx";
 import RealtorListings from "./pages/realtor/listing/MyListing.tsx";
-import RealtorDashboard from "./pages/realtor/dashboard/index.tsx";
 import SellerListings from "./pages/realtor/listing/MyListing.tsx";
 import About from "./pages/public/landing/About.tsx";
 import { Services } from "./pages/public/landing/Services.tsx";
@@ -118,15 +116,7 @@ const Root = () => {
             {userRole === "seller" ? <SellerListings /> : <Listings />}
           </AuthRoute>
         } />
-        <Route path="/favorites" element={
-          userRole === "seller" ? (
-            <Navigate to="/realtorDashboard" />
-          ) : (
-            <AuthRoute isAuthenticated={isAuthenticated}>
-              <Favorites />
-            </AuthRoute>
-          )
-        } />
+        
         <Route path="/messages" element={
           <AuthRoute isAuthenticated={isAuthenticated}>
             <Messages />
@@ -137,11 +127,7 @@ const Root = () => {
             <RealtorListings />
           </AuthRoute>
         } />
-        <Route path="/realtorDashboard" element={
-          <AuthRoute isAuthenticated={isAuthenticated}>
-            <RealtorDashboard />
-          </AuthRoute>
-        } />
+        
         <Route path="/about" element={<About />} />
         <Route path="/services" element={<Services />} />
         <Route path="*" element={<Navigate to="/" />} />

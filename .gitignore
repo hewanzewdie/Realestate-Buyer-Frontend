@@ -22,7 +22,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # env
-# .env
+.env
 .env.*.local
 .DS_Store
 # editor and ide
