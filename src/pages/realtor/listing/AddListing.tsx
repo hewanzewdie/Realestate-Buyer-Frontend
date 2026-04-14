@@ -23,10 +23,11 @@ import { getAuth } from "firebase/auth";
 import toast from "react-hot-toast";
 import { Textarea } from "@/components/ui/textarea";
 import z from "zod";
-import { useForm, type SubmitHandler } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createProperty } from "@/api/property";
+import type { AxiosError } from "axios";
 
 interface AddListingProps {
   trigger: React.ReactNode;
@@ -48,7 +49,8 @@ const addListingSchema = z.object({
   leaseTerm: z.string().optional(),
 });
 
-type AddListingFormData = z.infer<typeof addListingSchema>;
+type AddListingFormInput = z.input<typeof addListingSchema>;
+type AddListingFormOutput = z.output<typeof addListingSchema>;
 
 export function AddListing({ trigger, onAddListing }: AddListingProps) {
   const queryClient = useQueryClient();
@@ -60,7 +62,7 @@ export function AddListing({ trigger, onAddListing }: AddListingProps) {
     watch,
     reset,
     formState: { errors },
-  } = useForm<AddListingFormData>({
+  } = useForm<AddListingFormInput, unknown, AddListingFormOutput>({
     resolver: zodResolver(addListingSchema),
     defaultValues: {
       status: "available",
@@ -77,12 +79,12 @@ export function AddListing({ trigger, onAddListing }: AddListingProps) {
       onAddListing?.(newProperty);
       document.getElementById("close-add-dialog")?.click();
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<{ message?: string }>) => {
       toast.error(error?.response?.data?.message || "Failed to add property");
     },
   });
 
-  const onSubmit: SubmitHandler<AddListingFormData> = (data) => {
+  const onSubmit = (data: AddListingFormOutput) => {
     const user = getAuth().currentUser;
     if (!user) {
       toast.error("You must be logged in");
@@ -145,7 +147,9 @@ export function AddListing({ trigger, onAddListing }: AddListingProps) {
               <Label htmlFor="title">Title</Label>
               <Input id="title" {...register("title")} />
               {errors.title && (
-                <p className="text-xs text-destructive">{errors.title.message}</p>
+                <p className="text-xs text-destructive">
+                  {errors.title.message}
+                </p>
               )}
             </div>
 
@@ -196,7 +200,9 @@ export function AddListing({ trigger, onAddListing }: AddListingProps) {
                 {...register("area")}
               />
               {errors.area && (
-                <p className="text-xs text-destructive">{errors.area.message}</p>
+                <p className="text-xs text-destructive">
+                  {errors.area.message}
+                </p>
               )}
             </div>
 

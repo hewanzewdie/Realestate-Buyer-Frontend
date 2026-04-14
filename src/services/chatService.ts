@@ -34,26 +34,20 @@ export interface ChatMessage {
   time: string;
 }
 
-/**
- * Get or create a chat between buyer and seller for a property
- */
 export async function getOrCreateChat(
   buyerId: string,
   sellerId: string,
   propertyId: string,
 ): Promise<string> {
-  // Always treat the pair as sorted to avoid duplicates
   const chatId = `${propertyId}_${buyerId}_${sellerId}`;
-  // Deterministic document ID = no duplicates possible
   const chatRef = doc(db, "chats", chatId);
 
   const chatSnap = await getDoc(chatRef);
 
   if (chatSnap.exists()) {
-    return chatRef.id; // Already exists → return it
+    return chatRef.id; 
   }
 
-  // Create it exactly once
   const now = Timestamp.now();
   await setDoc(chatRef, {
     buyerId,
@@ -66,9 +60,6 @@ export async function getOrCreateChat(
   return chatRef.id;
 }
 
-/**
- * Send a message to a chat
- */
 export async function sendMessage(
   chatId: string,
   text: string,
@@ -90,7 +81,6 @@ export async function sendMessage(
     time: timeString,
   });
 
-  // Update chat's last message and updatedAt
   const chatRef = doc(db, "chats", chatId);
   await updateDoc(chatRef, {
     lastMessage: text.trim(),
@@ -99,9 +89,6 @@ export async function sendMessage(
   });
 }
 
-/**
- * Get all chats for a user (buyer or seller)
- */
 export async function getUserChats(userId: string): Promise<Chat[]> {
   const chatsRef = collection(db, "chats");
   const q = query(chatsRef, where("buyerId", "==", userId));
@@ -125,7 +112,6 @@ export async function getUserChats(userId: string): Promise<Chat[]> {
       }) as Chat,
   );
 
-  // Combine and sort by updatedAt
   const allChats = [...buyerChats, ...sellerChats];
   return allChats.sort((a, b) => {
     const aTime = a.updatedAt?.toMillis() || 0;
@@ -134,9 +120,6 @@ export async function getUserChats(userId: string): Promise<Chat[]> {
   });
 }
 
-/**
- * Listen to messages in a chat (real-time updates)
- */
 export function subscribeToMessages(
   chatId: string,
   callback: (messages: ChatMessage[]) => void,
@@ -156,17 +139,12 @@ export function subscribeToMessages(
   });
 }
 
-/**
- * Listen to user's chats (real-time updates)
- */
 export function subscribeToUserChats(
   userId: string,
   callback: (chats: Chat[]) => void,
 ): () => void {
   const chatsRef = collection(db, "chats");
 
-  // We need to listen to both buyer and seller chats
-  // Firestore doesn't support OR queries, so we'll listen to all chats and filter
   const q = query(chatsRef, orderBy("updatedAt", "desc"));
 
   return onSnapshot(q, (snapshot) => {
@@ -184,9 +162,6 @@ export function subscribeToUserChats(
   });
 }
 
-/**
- * Get a single chat by ID
- */
 export async function getChat(chatId: string): Promise<Chat | null> {
   const chatRef = doc(db, "chats", chatId);
   const chatSnap = await getDoc(chatRef);

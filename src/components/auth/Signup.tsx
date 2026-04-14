@@ -40,7 +40,6 @@ export default function Signup({
 
   const handleSignup = async (data: SignupFormData) => {
     try {
-      // Create firebase auth user
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         data.email,
@@ -49,7 +48,6 @@ export default function Signup({
 
       const user = userCredential.user;
 
-      // Create backend user
       await createUser({
         uid: user.uid,
         fullname: data.fullname,
@@ -111,7 +109,9 @@ export default function Signup({
               className="mt-1"
             />
             {errors.fullname && (
-              <p className="text-sm text-destructive">{errors.fullname.message}</p>
+              <p className="text-sm text-destructive">
+                {errors.fullname.message}
+              </p>
             )}
           </div>
 
@@ -157,7 +157,9 @@ export default function Signup({
               className="mt-1"
             />
             {errors.password && (
-              <p className="text-sm text-destructive">{errors.password.message}</p>
+              <p className="text-sm text-destructive">
+                {errors.password.message}
+              </p>
             )}
           </div>
 

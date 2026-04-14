@@ -3,6 +3,7 @@ import PropertyCard from "../../../components/listings/PropertyCard";
 import { getPropertyById } from "@/api/property";
 import { useQueries } from "@tanstack/react-query";
 import LoadingSkeleton from "@/components/common/LoadingSkeleton";
+import type { Property } from "@/types/property";
 
 export default function FavoritesPage() {
   const { favorites, loading: favoritesListLoading } = useFavorites();
@@ -10,16 +11,16 @@ export default function FavoritesPage() {
   const results = useQueries({
     queries: favorites.map((id) => ({
       queryKey: ["property", id],
-      queryFn: () => getPropertyById(id),
+      queryFn: () => getPropertyById({ id }),
     })),
   });
 
   const isLoadingProperties = results.some((result) => result.isLoading);
   const isError = results.some((result) => result.isError);
 
-  const favoriteProperties = results
+  const favoriteProperties: Property[] = results
     .map((result) => result.data)
-    .filter((prop) => !!prop);
+    .filter((prop): prop is Property => !!prop);
 
   if (favoritesListLoading || isLoadingProperties) {
     return (
@@ -38,7 +39,9 @@ export default function FavoritesPage() {
 
   if (isError) {
     return (
-      <p className="text-center py-10 text-destructive">Error loading favorites.</p>
+      <p className="text-center py-10 text-destructive">
+        Error loading favorites.
+      </p>
     );
   }
 

@@ -15,7 +15,7 @@ export const getPropertyById = async ({ id }: GetPropertyByIdParams) => {
   return res.data;
 };
 
-interface CreatePropertyPayload {
+export interface CreatePropertyPayload {
   title: string;
   description: string;
   location: string;

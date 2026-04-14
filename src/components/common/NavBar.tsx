@@ -6,8 +6,6 @@ import { Button } from "../ui/button";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { db, auth } from "../../../firebase";
-// import { getUser } from "@/api/auth";
-// import { useQuery } from '@tanstack/react-query'
 
 export default function NavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

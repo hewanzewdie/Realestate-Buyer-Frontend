@@ -28,6 +28,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { deleteProperty, getPropertyById } from "@/api/property";
 import LoadingSkeleton from "../common/LoadingSkeleton";
+import type { AxiosError } from "axios";
 
 export default function ListingDetail() {
   const { id } = useParams<{ id: string }>();
@@ -65,14 +66,17 @@ export default function ListingDetail() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const deleteMutation = useMutation({
-    mutationFn: () => deleteProperty(id),
+    mutationFn: () => {
+      if (!id) throw new Error("Missing property id");
+      return deleteProperty(id);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["my-properties"] });
       queryClient.invalidateQueries({ queryKey: ["properties"] });
       setDeleteDialogOpen(false);
       navigate("/realtorListings");
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<{ message?: string }>) => {
       toast.error(
         error?.response?.data?.message || "Failed to delete property",
       );
@@ -95,7 +99,9 @@ export default function ListingDetail() {
   if (!property) {
     return (
       <div className="bg-white p-10 text-center">
-        <h1 className="text-2xl font-bold text-destructive">Property not found</h1>
+        <h1 className="text-2xl font-bold text-destructive">
+          Property not found
+        </h1>
         <p className="text-gray-600">
           The property you're looking for doesn't exist.
         </p>
@@ -169,7 +175,9 @@ export default function ListingDetail() {
               >
                 <HeartIcon
                   className={`w-5 h-5 transition-colors ${
-                    isFavorited ? "fill-destructive text-destructive" : "text-gray-400"
+                    isFavorited
+                      ? "fill-destructive text-destructive"
+                      : "text-gray-400"
                   }`}
                 />
               </Button>

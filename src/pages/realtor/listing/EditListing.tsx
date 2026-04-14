@@ -24,9 +24,10 @@ import toast from "react-hot-toast";
 import { Textarea } from "@/components/ui/textarea";
 import z from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm, type SubmitHandler } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { editProperty } from "@/api/property";
+import { editProperty, type CreatePropertyPayload } from "@/api/property";
+import type { AxiosError } from "axios";
 
 interface EditListingProps {
   trigger: React.ReactNode;
@@ -49,7 +50,8 @@ const editListingSchema = z.object({
   leaseTerm: z.string().optional(),
 });
 
-type EditListingFormData = z.infer<typeof editListingSchema>;
+type EditListingFormInput = z.input<typeof editListingSchema>;
+type EditListingFormOutput = z.output<typeof editListingSchema>;
 
 export default function EditListing({
   trigger,
@@ -66,7 +68,7 @@ export default function EditListing({
     watch,
     reset,
     formState: { errors },
-  } = useForm<EditListingFormData>({
+  } = useForm<EditListingFormInput, unknown, EditListingFormOutput>({
     resolver: zodResolver(editListingSchema),
     defaultValues: {
       title: property.title,
@@ -94,20 +96,21 @@ export default function EditListing({
   const watchListingType = watch("listingType");
 
   const editPropertyMutation = useMutation({
-    mutationFn: (payload: any) => editProperty(property.id, payload),
+    mutationFn: (payload: CreatePropertyPayload) =>
+      editProperty(property.id, payload),
     onSuccess: (updatedData) => {
       queryClient.invalidateQueries({ queryKey: ["my-properties"] });
       onUpdate?.(updatedData);
       document.getElementById("close-edit-dialog")?.click();
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<{ message?: string }>) => {
       toast.error(
         error?.response?.data?.message || "Failed to update property",
       );
     },
   });
 
-  const onSubmit: SubmitHandler<EditListingFormData> = (data) => {
+  const onSubmit = (data: EditListingFormOutput) => {
     if (!user) return;
 
     const payload = {
@@ -163,7 +166,9 @@ export default function EditListing({
               <Label htmlFor="edit-title">Title</Label>
               <Input id="edit-title" {...register("title")} />
               {errors.title && (
-                <p className="text-xs text-destructive">{errors.title.message}</p>
+                <p className="text-xs text-destructive">
+                  {errors.title.message}
+                </p>
               )}
             </div>
 
@@ -175,7 +180,7 @@ export default function EditListing({
                   setValue("location", val, { shouldValidate: true })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -206,7 +211,7 @@ export default function EditListing({
                   setValue("propertyType", val, { shouldValidate: true })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -261,7 +266,7 @@ export default function EditListing({
                   setValue("status", val, { shouldValidate: true })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

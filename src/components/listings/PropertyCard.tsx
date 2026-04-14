@@ -47,10 +47,16 @@ export default function PropertyCard(property: Property) {
         openLoginModal={authModals.login}
         openSignupModal={authModals.signup}
         setOpenLoginModal={(val) =>
-          setAuthModals({ ...authModals, login: val })
+          setAuthModals((prev) => ({
+            ...prev,
+            login: typeof val === "function" ? val(prev.login) : val,
+          }))
         }
         setOpenSignupModal={(val) =>
-          setAuthModals({ ...authModals, signup: val })
+          setAuthModals((prev) => ({
+            ...prev,
+            signup: typeof val === "function" ? val(prev.signup) : val,
+          }))
         }
       />
     </div>

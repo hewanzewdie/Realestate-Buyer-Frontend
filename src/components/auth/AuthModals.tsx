@@ -132,11 +132,7 @@ const AuthModals = ({
             </DialogHeader>
             <div className="flex flex-col space-y-3">
               <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                {...login("loginEmail")}
-                required
-              />
+              <Input id="email" {...login("loginEmail")} required />
               {loginErrors.loginEmail && (
                 <p className="text-sm text-destructive">
                   {loginErrors.loginEmail.message}

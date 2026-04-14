@@ -39,9 +39,7 @@ export default function SellerListings() {
     );
   }
 
-  const allProperties: Property[] = Array.isArray(data)
-    ? data
-    : (data?.properties ?? []);
+  const allProperties: Property[] = data;
 
   const properties = allProperties.filter(
     (property) => property.sellerId === user.uid,

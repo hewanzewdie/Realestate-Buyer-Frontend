@@ -15,12 +15,12 @@ export function useFavorites() {
   const auth = getAuth();
   const user = auth.currentUser;
 
-  const { data: favorites = [], isLoading } = useQuery({
+  const { data: favorites = [], isLoading } = useQuery<string[]>({
     queryKey: ["favorites", user?.uid],
     queryFn: async () => {
       if (!user) return [];
       const userDoc = await getDoc(doc(db, "users", user.uid));
-      return userDoc.data()?.favorites || [];
+      return (userDoc.data()?.favorites as string[] | undefined) || [];
     },
     enabled: !!user,
     staleTime: 1000 * 60 * 5,
@@ -59,7 +59,7 @@ export function useFavorites() {
 
       return { previousFavorites };
     },
-    onError: (err, propertyId, context) => {
+    onError: (_err, _propertyId, context) => {
       if (context?.previousFavorites) {
         queryClient.setQueryData(
           ["favorites", user?.uid],
