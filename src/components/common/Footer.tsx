@@ -1,17 +1,16 @@
 import logo from "../../assets/logo.png";
 import { Link } from "react-router-dom";
-import { MailIcon, PhoneIcon, MapPinIcon } from 'lucide-react'
+import { MailIcon, PhoneIcon, MapPinIcon } from "lucide-react";
 
 export default function Footer() {
- 
   return (
-  <footer className="bg-gray-900 text-gray-300">
+    <footer className="bg-gray-900 text-gray-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
-                <img src={logo} alt="logo"  className="w-16 h-16"/>
-                <span className="text-lg font-semibold text-white">
+              <img src={logo} alt="logo" className="w-16 h-16" />
+              <span className="text-lg font-semibold text-white">
                 RealEstate
               </span>
             </div>
@@ -27,7 +26,7 @@ export default function Footer() {
               <li>
                 <Link
                   to="/"
-                  className="text-sm hover:text-teal-500 transition-colors"
+                  className="text-sm hover:text-primary transition-colors"
                 >
                   Home
                 </Link>
@@ -35,7 +34,7 @@ export default function Footer() {
               <li>
                 <Link
                   to="/about"
-                  className="text-sm hover:text-teal-500 transition-colors"
+                  className="text-sm hover:text-primary transition-colors"
                 >
                   About
                 </Link>
@@ -43,7 +42,7 @@ export default function Footer() {
               <li>
                 <Link
                   to="/services"
-                  className="text-sm hover:text-teal-500 transition-colors"
+                  className="text-sm hover:text-primary transition-colors"
                 >
                   Features
                 </Link>
@@ -51,7 +50,7 @@ export default function Footer() {
               <li>
                 <Link
                   to="/listings"
-                  className="text-sm hover:text-teal-500 transition-colors"
+                  className="text-sm hover:text-primary transition-colors"
                 >
                   Browse Listings
                 </Link>
@@ -74,15 +73,15 @@ export default function Footer() {
             <h3 className="text-white font-semibold mb-4">Contact Support</h3>
             <ul className="space-y-3">
               <li className="flex items-start gap-2 text-sm">
-                <MapPinIcon className="w-4 h-4 mt-0.5 flex-shrink-0 text-teal-500" />
+                <MapPinIcon className="w-4 h-4 mt-0.5 flex-shrink-0 text-primary" />
                 <span>Bole, Addis Ababa, Ethiopia</span>
               </li>
               <li className="flex items-center gap-2 text-sm">
-                <PhoneIcon className="w-4 h-4 flex-shrink-0 text-teal-500" />
+                <PhoneIcon className="w-4 h-4 flex-shrink-0 text-primary" />
                 <a href="tel:+251001234567">+251 00 123 4567</a>
               </li>
               <li className="flex items-center gap-2 text-sm">
-                <MailIcon className="w-4 h-4 flex-shrink-0 text-teal-500" />
+                <MailIcon className="w-4 h-4 flex-shrink-0 text-primary" />
                 <a href="mailto:support@realestate.et">support@realestate.et</a>
               </li>
             </ul>
@@ -90,12 +89,9 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
-          <p>
-            &copy; 2025 RealEstate Platform. All rights
-            reserved.
-          </p>
+          <p>&copy; 2025 RealEstate Platform. All rights reserved.</p>
         </div>
       </div>
     </footer>
-  )
+  );
 }

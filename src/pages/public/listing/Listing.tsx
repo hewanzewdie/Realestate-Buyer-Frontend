@@ -1,9 +1,11 @@
-import PropertyCard from "../../../components/listings/ListingCard";
+import PropertyCard from "../../../components/listings/PropertyCard";
 import type { Property } from "../../../types/property";
-import { useEffect, useState } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
 import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { getAllProperties } from "@/api/property";
+import LoadingSkeleton from "@/components/common/LoadingSkeleton";
 
 export type ListingFilters = {
   type?: "all" | "sale" | "rent";
@@ -16,7 +18,7 @@ export type ListingFilters = {
 
 function applyFilters(
   properties: Property[],
-  filters: ListingFilters
+  filters: ListingFilters,
 ): Property[] {
   const {
     type = "all",
@@ -37,7 +39,9 @@ function applyFilters(
 
     if (location && !p.location.toLowerCase().includes(location.toLowerCase()))
       return false;
+
     if (propertyType && p.propertyType !== propertyType) return false;
+
     if (favorites && favorites.length > 0 && !favorites.includes(p.id))
       return false;
 
@@ -46,14 +50,9 @@ function applyFilters(
 }
 
 function PropertyList(props: { filters?: ListingFilters; showOnly?: number }) {
-  const [allProperties, setAllProperties] = useState<Property[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<string | null>(null);
 
-  const api = import.meta.env.VITE_API_URL;
   const auth = getAuth();
   const db = getFirestore();
 
@@ -78,54 +77,42 @@ function PropertyList(props: { filters?: ListingFilters; showOnly?: number }) {
       }
     });
 
-    return () => unsubscribe();
+    return unsubscribe;
   }, [auth, db]);
 
-  useEffect(() => {
-    const fetchProperties = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  const { data, isLoading, isError } = useQuery({
+    queryFn: getAllProperties,
+    queryKey: ["all-properties"],
+  });
 
-        const response = await fetch(`${api}/properties`);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const properties = data ?? [];
 
-        const data: Property[] = await response.json();
+  let displayProperties = applyFilters(properties, props.filters ?? {});
 
-        if (user && role?.toLowerCase() === "seller") {
-          const sellerOnly = data.filter((p) => p.sellerId === user.uid);
-          setAllProperties(sellerOnly);
-        } else {
-          setAllProperties(data);
-        }
-      } catch (err) {
-        setError("Failed to load properties");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProperties();
-  }, [api, user, role]); 
-
-  const filtered = applyFilters(allProperties, props.filters ?? {});
-  const displayProperties = props.showOnly
-    ? filtered.slice(0, props.showOnly)
-    : filtered;
-
-  if (loading) {
+  if (role === "seller") {
+    displayProperties = displayProperties.filter(
+      (property) => property.sellerId === user?.uid,
+    );
+  }
+  if (props.showOnly !== undefined) {
+    displayProperties = displayProperties.slice(0, props.showOnly);
+  }
+  if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[...Array(6)].map((_, i) => (
-          <Skeleton key={i} className="h-80 rounded-xl" />
+        {[...Array(3)].map((_, i) => (
+          <LoadingSkeleton type="propertyCard" key={i} />
         ))}
       </div>
     );
   }
 
-  if (error) {
-    return <div className="text-center text-red-600 py-10">Error: {error}</div>;
+  if (isError) {
+    return (
+      <div className="text-center text-destructive py-10">
+        Error: Failed to load properties
+      </div>
+    );
   }
 
   if (displayProperties.length === 0) {

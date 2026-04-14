@@ -1,46 +1,48 @@
-import { useEffect, useState } from "react";
 import { useFavorites } from "../../../hooks/useFavorites";
-import PropertyCard from "../../../components/listings/ListingCard";
-import type { Property } from "../../../types/property";
+import PropertyCard from "../../../components/listings/PropertyCard";
+import { getPropertyById } from "@/api/property";
+import { useQueries } from "@tanstack/react-query";
+import LoadingSkeleton from "@/components/common/LoadingSkeleton";
 
 export default function FavoritesPage() {
-  const { favorites, loading } = useFavorites();
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [isFetching, setIsFetching] = useState(false);
+  const { favorites, loading: favoritesListLoading } = useFavorites();
 
-  const api = import.meta.env.VITE_API_URL;
-  useEffect(() => {
-    if (loading) return;
-    if (favorites.length === 0) {
-      setProperties([]);
-      return;
-    }
+  const results = useQueries({
+    queries: favorites.map((id) => ({
+      queryKey: ["property", id],
+      queryFn: () => getPropertyById(id),
+    })),
+  });
 
-    const fetchFavorites = async () => {
-      setIsFetching(true);
-      try {
-        const fetchedProperties = await Promise.all(
-          favorites.map(async (id) => {
-            const res = await fetch(`${api}/properties/${id}`);
-            if (!res.ok) throw new Error(`Failed to fetch property ${id}`);
-            return res.json();
-          })
-        );
-        setProperties(fetchedProperties);
-      } catch (err) {
-        console.error("Failed to load favorite properties:", err);
-      } finally {
-        setIsFetching(false);
-      }
-    };
+  const isLoadingProperties = results.some((result) => result.isLoading);
+  const isError = results.some((result) => result.isError);
 
-    fetchFavorites();
-  }, [favorites, loading, api]);
+  const favoriteProperties = results
+    .map((result) => result.data)
+    .filter((prop) => !!prop);
 
-  if (loading || isFetching)
-    return <p className="text-center text-gray-500 py-10">Loading favorites...</p>;
+  if (favoritesListLoading || isLoadingProperties) {
+    return (
+      <div className="p-5">
+        <h2 className="text-2xl font-semibold mb-6">
+          Your Favorite Properties
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(3)].map((_, i) => (
+            <LoadingSkeleton key={i} type="propertyCard" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
-  if (favorites.length === 0 || properties.length === 0)
+  if (isError) {
+    return (
+      <p className="text-center py-10 text-destructive">Error loading favorites.</p>
+    );
+  }
+
+  if (favorites.length === 0 || favoriteProperties.length === 0) {
     return (
       <div className="text-center py-20">
         <p className="text-2xl font-semibold text-gray-600">No favorites yet</p>
@@ -49,12 +51,13 @@ export default function FavoritesPage() {
         </p>
       </div>
     );
+  }
 
   return (
     <div className="p-5">
       <h2 className="text-2xl font-semibold mb-6">Your Favorite Properties</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {properties.map((property) => (
+        {favoriteProperties.map((property) => (
           <PropertyCard key={property.id} {...property} />
         ))}
       </div>

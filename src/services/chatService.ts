@@ -1,16 +1,16 @@
-import { 
-  collection, 
-  doc, 
-  getDoc, 
-  setDoc, 
-  addDoc, 
-  query, 
-  where, 
-  orderBy, 
-  onSnapshot, 
+import {
+  collection,
+  doc,
+  getDoc,
+  setDoc,
+  addDoc,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
   Timestamp,
   getDocs,
-  updateDoc
+  updateDoc,
 } from "firebase/firestore";
 import { db } from "../../firebase";
 
@@ -40,10 +40,10 @@ export interface ChatMessage {
 export async function getOrCreateChat(
   buyerId: string,
   sellerId: string,
-  propertyId: string
+  propertyId: string,
 ): Promise<string> {
   // Always treat the pair as sorted to avoid duplicates
-const chatId = `${propertyId}_${buyerId}_${sellerId}`
+  const chatId = `${propertyId}_${buyerId}_${sellerId}`;
   // Deterministic document ID = no duplicates possible
   const chatRef = doc(db, "chats", chatId);
 
@@ -73,7 +73,7 @@ export async function sendMessage(
   chatId: string,
   text: string,
   senderId: string,
-  receiverId: string
+  receiverId: string,
 ): Promise<void> {
   const now = new Date();
   const hours = now.getHours() % 12 || 12;
@@ -104,26 +104,26 @@ export async function sendMessage(
  */
 export async function getUserChats(userId: string): Promise<Chat[]> {
   const chatsRef = collection(db, "chats");
-  const q = query(
-    chatsRef,
-    where("buyerId", "==", userId)
-  );
+  const q = query(chatsRef, where("buyerId", "==", userId));
 
   const querySnapshot = await getDocs(q);
-  const buyerChats = querySnapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  } as Chat));
-
-  const sellerQ = query(
-    chatsRef,
-    where("sellerId", "==", userId)
+  const buyerChats = querySnapshot.docs.map(
+    (doc) =>
+      ({
+        id: doc.id,
+        ...doc.data(),
+      }) as Chat,
   );
+
+  const sellerQ = query(chatsRef, where("sellerId", "==", userId));
   const sellerQuerySnapshot = await getDocs(sellerQ);
-  const sellerChats = sellerQuerySnapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  } as Chat));
+  const sellerChats = sellerQuerySnapshot.docs.map(
+    (doc) =>
+      ({
+        id: doc.id,
+        ...doc.data(),
+      }) as Chat,
+  );
 
   // Combine and sort by updatedAt
   const allChats = [...buyerChats, ...sellerChats];
@@ -139,16 +139,19 @@ export async function getUserChats(userId: string): Promise<Chat[]> {
  */
 export function subscribeToMessages(
   chatId: string,
-  callback: (messages: ChatMessage[]) => void
+  callback: (messages: ChatMessage[]) => void,
 ): () => void {
   const messagesRef = collection(db, "chats", chatId, "messages");
   const q = query(messagesRef, orderBy("createdAt", "asc"));
 
   return onSnapshot(q, (snapshot) => {
-    const messages: ChatMessage[] = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    } as ChatMessage));
+    const messages: ChatMessage[] = snapshot.docs.map(
+      (doc) =>
+        ({
+          id: doc.id,
+          ...doc.data(),
+        }) as ChatMessage,
+    );
     callback(messages);
   });
 }
@@ -158,22 +161,25 @@ export function subscribeToMessages(
  */
 export function subscribeToUserChats(
   userId: string,
-  callback: (chats: Chat[]) => void
+  callback: (chats: Chat[]) => void,
 ): () => void {
   const chatsRef = collection(db, "chats");
-  
+
   // We need to listen to both buyer and seller chats
   // Firestore doesn't support OR queries, so we'll listen to all chats and filter
   const q = query(chatsRef, orderBy("updatedAt", "desc"));
 
   return onSnapshot(q, (snapshot) => {
     const allChats: Chat[] = snapshot.docs
-      .map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as Chat))
-      .filter(chat => chat.buyerId === userId || chat.sellerId === userId);
-    
+      .map(
+        (doc) =>
+          ({
+            id: doc.id,
+            ...doc.data(),
+          }) as Chat,
+      )
+      .filter((chat) => chat.buyerId === userId || chat.sellerId === userId);
+
     callback(allChats);
   });
 }
@@ -184,14 +190,13 @@ export function subscribeToUserChats(
 export async function getChat(chatId: string): Promise<Chat | null> {
   const chatRef = doc(db, "chats", chatId);
   const chatSnap = await getDoc(chatRef);
-  
+
   if (!chatSnap.exists()) {
     return null;
   }
 
   return {
     id: chatSnap.id,
-    ...chatSnap.data()
+    ...chatSnap.data(),
   } as Chat;
 }
-

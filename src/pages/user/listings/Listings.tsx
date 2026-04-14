@@ -15,9 +15,8 @@ export default function Listings() {
   const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
   const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
   const [location, setLocation] = useState<string | undefined>(undefined);
-  const [propertyType, setPropertyType] = useState<
-    ListingFilters["propertyType"]
-  >(undefined);
+  const [propertyType, setPropertyType] =
+    useState<ListingFilters["propertyType"]>(undefined);
   const [activeTab, setActiveTab] = useState<"all" | "saved">("all");
 
   const { favorites, loading: favoritesLoading } = useFavorites();
@@ -46,7 +45,7 @@ export default function Listings() {
         <Button
           className={`p-1.5 w-16 rounded-md ${
             type === "all"
-              ? "bg-[#1bada2] hover:bg-[#1bada2]"
+              ? "bg-primary hover:bg-primary"
               : "bg-gray-300 text-black hover:text-white"
           }`}
           onClick={() => setType("all")}
@@ -56,7 +55,7 @@ export default function Listings() {
         <Button
           className={`p-1.5 w-16 rounded-md ${
             type === "sale"
-              ? "bg-[#1bada2] hover:bg-[#1bada2]"
+              ? "bg-primary hover:bg-primary"
               : "bg-gray-300 text-black hover:text-white"
           }`}
           onClick={() => setType("sale")}
@@ -66,7 +65,7 @@ export default function Listings() {
         <Button
           className={`p-1.5 w-16 rounded-md ${
             type === "rent"
-              ? "bg-[#1bada2] hover:bg-[#1bada2]"
+              ? "bg-primary hover:bg-primary"
               : "bg-gray-300 text-black hover:text-white"
           }`}
           onClick={() => setType("rent")}
@@ -127,7 +126,9 @@ export default function Listings() {
 
           <div className="flex flex-col space-y-2">
             <p>Property type</p>
-            <Select onValueChange={(v) => setPropertyType(v as typeof propertyType)}>
+            <Select
+              onValueChange={(v) => setPropertyType(v as typeof propertyType)}
+            >
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Any" />
               </SelectTrigger>
@@ -143,7 +144,7 @@ export default function Listings() {
 
           <Button
             onClick={clearFilters}
-            className="bg-[#1bada2] p-1 w-full self-end md:w-40 rounded-lg text-white"
+            className="bg-primary p-1 w-full self-end md:w-40 rounded-lg text-white"
           >
             Clear filters
           </Button>

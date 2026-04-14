@@ -2,11 +2,22 @@ import logo from "../../assets/logo.png";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import toast from "react-hot-toast";
 import { auth } from "../../../firebase";
 import { ArrowLeft } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { getUser } from "@/api/auth";
+import { Label } from "@radix-ui/react-label";
+
+const loginSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function Login({
   setIsAuthenticated,
@@ -14,28 +25,25 @@ export default function Login({
   setIsAuthenticated: (val: boolean) => void;
 }) {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [authing, setAuthing] = useState(false);
-  const [error, setError] = useState("");
 
-  const api = import.meta.env.VITE_API_URL;
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
 
-  const signInWithEmail = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAuthing(true);
-    setError("");
-
+  const signInWithEmail = async (data: LoginFormData) => {
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        data.email,
+        data.password,
+      );
+
       const user = userCredential.user;
-
-      const res = await fetch(`${api}/user/${user.uid}`);
-      if (!res.ok) {
-        throw new Error("Failed to fetch user profile");
-      }
-
-      const userData = await res.json();
+      const userData = await getUser({ userId: user.uid });
 
       if (userData?.role === "seller") {
         toast.success("Welcome back, Seller!");
@@ -47,71 +55,75 @@ export default function Login({
 
       setIsAuthenticated(true);
     } catch (error) {
-      if(error instanceof Error){
-                setError(error.message);
-      }
-      else{
-        setError('Something went wrong')
-      }
-      } finally {
-      setAuthing(false);
+      console.error(error);
+      toast.error("Invalid email or password");
     }
   };
 
   return (
     <>
-      <Button onClick={() => navigate("/")} className="ml-10 mt-10 bg-gray-300 text-black hover:bg-gray-400">
+      <Button
+        onClick={() => navigate("/")}
+        className="ml-10 mt-10 bg-gray-300 text-black hover:bg-gray-400"
+      >
         <ArrowLeft />
       </Button>
 
       <div className="flex py-10 w-full max-w-5xl mx-auto h-screen">
-        <div className="bg-[#50b6c1] w-1/2 hidden md:flex items-center justify-center shadow-xl">
+        <div className="bg-primary w-1/2 hidden md:flex items-center justify-center shadow-xl">
           <img src={logo} alt="logo" className="w-40" />
         </div>
 
         <form
-          onSubmit={signInWithEmail}
+          onSubmit={handleSubmit(signInWithEmail)}
           className="flex flex-col w-full md:w-1/2 p-8 justify-center gap-4 bg-white shadow-xl"
         >
-          <h2 className="text-3xl font-bold text-[#50b6c1]">Login</h2>
-
-          {error && <p className="text-red-600 text-sm">{error}</p>}
+          <h2 className="text-3xl font-bold text-primary">Login</h2>
 
           <div>
-            <label>Email <span className="text-red-600">*</span></label>
+            <Label>
+              Email <span className="text-destructive">*</span>
+            </Label>
             <Input
               type="email"
               placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
+              {...register("email")}
               className="mt-1"
             />
+            {errors.email && (
+              <p className="text-sm text-destructive">{errors.email.message}</p>
+            )}
           </div>
 
           <div>
-            <label>Password <span className="text-red-600">*</span></label>
+            <label>
+              Password <span className="text-destructive">*</span>
+            </label>
             <Input
               type="password"
               placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
+              {...register("password")}
               className="mt-1"
             />
+            {errors.password && (
+              <p className="text-sm text-destructive">{errors.password.message}</p>
+            )}
           </div>
 
           <Button
             type="submit"
-            disabled={authing}
-            className="bg-[#50b6c1] hover:bg-[#3a8a93] text-white font-medium py-6 text-lg"
+            disabled={isSubmitting}
+            className="bg-primary text-white font-medium py-6 text-lg"
           >
-            {authing ? "Logging in..." : "Login"}
+            {isSubmitting ? "Logging in..." : "Login"}
           </Button>
 
           <p className="text-center text-sm">
             Don't have an account?{" "}
-            <Link to="/signup" className="text-blue-600 hover:underline font-medium">
+            <Link
+              to="/signup"
+              className="text-blue-600 hover:underline font-medium"
+            >
               Sign Up
             </Link>
           </p>

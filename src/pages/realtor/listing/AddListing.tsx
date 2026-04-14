@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogClose, 
+  DialogClose,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,139 +18,124 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Property } from "@/types/property";
-import React, { useState } from "react";
+import React from "react";
 import { getAuth } from "firebase/auth";
 import toast from "react-hot-toast";
 import { Textarea } from "@/components/ui/textarea";
+import z from "zod";
+import { useForm, type SubmitHandler } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createProperty } from "@/api/property";
 
 interface AddListingProps {
   trigger: React.ReactNode;
-  onAddListing: (property: Property) => void;
+  onAddListing?: (property: Property) => void;
 }
 
-export function AddListing({ trigger, onAddListing }: AddListingProps) {
-  const api = import.meta.env.VITE_API_URL;
+const addListingSchema = z.object({
+  title: z.string().min(5, "Title must be at least 5 characters"),
+  description: z.string().min(10, "Description must be at least 10 characters"),
+  location: z.string().min(1, "Location is required"),
+  area: z.coerce.number().positive("Area must be positive"),
+  bedrooms: z.coerce.number().min(0),
+  bathrooms: z.coerce.number().min(0),
+  listingType: z.enum(["rent", "sale"]),
+  propertyType: z.string().min(1, "Property type is required"),
+  status: z.string().default("available"),
+  rentPrice: z.coerce.number().optional(),
+  salePrice: z.coerce.number().optional(),
+  leaseTerm: z.string().optional(),
+});
 
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    location: "",
-    area: "" as string | number,
-    bedrooms: "" as string | number,
-    bathrooms: "" as string | number,
-    forRent: false,
-    forSale: false,
-    leaseTerm: "",
-    propertyType: "" as const,
-    rentPrice: "" as string | number,
-    salePrice: "" as string | number,
-    status: "available" as const,
+type AddListingFormData = z.infer<typeof addListingSchema>;
+
+export function AddListing({ trigger, onAddListing }: AddListingProps) {
+  const queryClient = useQueryClient();
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm<AddListingFormData>({
+    resolver: zodResolver(addListingSchema),
+    defaultValues: {
+      status: "available",
+      listingType: "rent",
+    },
   });
 
-  const [isLoading, setIsLoading] = useState(false); 
+  const addPropertyMutation = useMutation({
+    mutationFn: createProperty,
+    onSuccess: (newProperty) => {
+      toast.success("Property added successfully!");
+      reset();
+      queryClient.invalidateQueries({ queryKey: ["my-properties"] });
+      onAddListing?.(newProperty);
+      document.getElementById("close-add-dialog")?.click();
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || "Failed to add property");
+    },
+  });
 
-  const propertyTypes = ["apartment", "commercial", "house", "condo", "townhouse", "land"];
-
-  const handleChange = <T extends keyof typeof formData>(field: T, value: typeof formData[T]) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-};
-
-  const statusOptions = formData.forRent
-    ? ["available", "rented", "pending"]
-    : formData.forSale
-    ? ["available", "sold", "pending"]
-    : ["available"];
-
-    const locationOptions = ["Addis Ababa", "Bole", "Kazanchis", "CMC", "Megenagna", "Piassa", "Mexico", "Bahir Dar", "Merkato"]
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const onSubmit: SubmitHandler<AddListingFormData> = (data) => {
     const user = getAuth().currentUser;
     if (!user) {
       toast.error("You must be logged in");
       return;
     }
-    if (!formData.forRent && !formData.forSale) {
-      toast.error("Please select For Rent or For Sale");
-      return;
-    }
 
-    setIsLoading(true); 
-
-    const payload: Partial<Property> = {
-      title: formData.title.trim(),
-      description: formData.description.trim(),
-      location: formData.location as Property["location"],
-      propertyType: formData.propertyType as Property["propertyType"],
-      area: Number(formData.area) || 0,
-      bedrooms: Number(formData.bedrooms) || 0,
-      bathrooms: Number(formData.bathrooms) || 0,
-      forRent: formData.forRent,
-      forSale: formData.forSale,
-      status: formData.status as Property["status"],
+    const payload = {
+      title: data.title,
+      description: data.description,
+      location: data.location,
+      propertyType: data.propertyType,
+      area: data.area,
+      bedrooms: data.bedrooms,
+      bathrooms: data.bathrooms,
+      status: data.status,
       sellerId: user.uid,
+      forRent: data.listingType === "rent",
+      forSale: data.listingType === "sale",
+      rentPrice: data.listingType === "rent" ? data.rentPrice : undefined,
+      salePrice: data.listingType === "sale" ? data.salePrice : undefined,
+      leaseTerm: data.listingType === "rent" ? data.leaseTerm : undefined,
     };
 
-    if (formData.forSale && formData.salePrice) payload.salePrice = Number(formData.salePrice);
-    if (formData.forRent && formData.rentPrice) payload.rentPrice = Number(formData.rentPrice);
-    if (formData.forRent && formData.leaseTerm) payload.leaseTerm = formData.leaseTerm.trim();
-
-    try {
-      const res = await fetch(`${api}/add-property`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const err = await res.text();
-        throw new Error(err || "Failed to add property");
-      }
-
-      const savedProperty: Property = await res.json();
-
-      onAddListing(savedProperty);
-
-      setFormData({
-        title: "",
-        description: "",
-        location: "",
-        area: "",
-        bedrooms: "",
-        bathrooms: "",
-        forRent: false,
-        forSale: false,
-        leaseTerm: "",
-        propertyType: "",
-        rentPrice: "",
-        salePrice: "",
-        status: "available",
-      });
-
-      
-    }  catch (error: unknown) {
-   let errorMessage = "Failed to add property";
-   
-   if (error instanceof Error) {
-    errorMessage = error.message;
-   } else if (typeof error === "string") {
-    errorMessage = error;
-   }
-
-   toast.error(errorMessage);
-  } finally {
-      document.getElementById("close-add-dialog")?.click();
-      setIsLoading(false); 
-      location.reload();
-    }
+    addPropertyMutation.mutate(payload);
   };
+
+  const watchListingType = watch("listingType");
+  const propertyTypes = [
+    "apartment",
+    "commercial",
+    "house",
+    "condo",
+    "townhouse",
+    "land",
+  ];
+  const locationOptions = [
+    "Bole",
+    "Kazanchis",
+    "CMC",
+    "Megenagna",
+    "Piassa",
+    "Mexico",
+    "Merkato",
+    "4 Kilo",
+    "Kaliti",
+  ];
 
   return (
     <Dialog>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogClose id="close-add-dialog" className="hidden" /> 
+      <DialogClose id="close-add-dialog" className="hidden" />
       <DialogContent className="sm:max-w-[700px] max-h-[85vh] overflow-y-auto">
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>
             <DialogTitle>Add New Property</DialogTitle>
           </DialogHeader>
@@ -158,35 +143,76 @@ export function AddListing({ trigger, onAddListing }: AddListingProps) {
           <div className="grid md:grid-cols-2 gap-6 py-4">
             <div className="grid gap-2">
               <Label htmlFor="title">Title</Label>
-              <Input id="title" value={formData.title} onChange={(e) => handleChange("title", e.target.value)} required />
+              <Input id="title" {...register("title")} />
+              {errors.title && (
+                <p className="text-xs text-destructive">{errors.title.message}</p>
+              )}
             </div>
 
             <div className="grid gap-2">
               <Label htmlFor="location">Location</Label>
-            <Select onValueChange={(v)=> handleChange("location", v as typeof formData.location)} value={formData.location}>
-              <SelectTrigger className="w-full"><SelectValue/></SelectTrigger>
-              <SelectContent>
-                {locationOptions.map((t)=>(
-                  <SelectItem key={t} value={t}>{t}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              <Select
+                onValueChange={(val) =>
+                  setValue("location", val, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                  })
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select Location" />
+                </SelectTrigger>
+                <SelectContent>
+                  {locationOptions.map((loc) => (
+                    <SelectItem key={loc} value={loc}>
+                      {loc}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.location && (
+                <p className="text-xs text-destructive">
+                  {errors.location.message}
+                </p>
+              )}
             </div>
 
             <div className="grid gap-2 col-span-2">
               <Label htmlFor="description">Description</Label>
-<Textarea id="description" value={formData.description} onChange={(e)=>handleChange("description", e.target.value)}/>
+              <Textarea id="description" {...register("description")} />
+              {errors.description && (
+                <p className="text-xs text-destructive">
+                  {errors.description.message}
+                </p>
+              )}
             </div>
 
             <div className="grid gap-2">
               <Label htmlFor="area">Area (sq ft)</Label>
-              <Input id="area" type="number" value={formData.area} onChange={(e) => handleChange("area", e.target.value)} />
+              <Input
+                id="area"
+                type="number"
+                placeholder="0"
+                {...register("area")}
+              />
+              {errors.area && (
+                <p className="text-xs text-destructive">{errors.area.message}</p>
+              )}
             </div>
 
             <div className="grid gap-2">
               <Label>Property Type</Label>
-              <Select onValueChange={(v) => handleChange("propertyType", v as typeof formData.propertyType)} value={formData.propertyType}>
-                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+              <Select
+                onValueChange={(val) =>
+                  setValue("propertyType", val, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                  })
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select Type" />
+                </SelectTrigger>
                 <SelectContent>
                   {propertyTypes.map((t) => (
                     <SelectItem key={t} value={t}>
@@ -195,77 +221,112 @@ export function AddListing({ trigger, onAddListing }: AddListingProps) {
                   ))}
                 </SelectContent>
               </Select>
+              {errors.propertyType && (
+                <p className="text-xs text-destructive">
+                  {errors.propertyType.message}
+                </p>
+              )}
             </div>
 
             <div className="grid gap-2">
               <Label htmlFor="bedrooms">Bedrooms</Label>
-              <Input id="bedrooms" type="number" value={formData.bedrooms} onChange={(e) => handleChange("bedrooms", e.target.value)} />
+              <Input
+                id="bedrooms"
+                type="number"
+                placeholder="0"
+                {...register("bedrooms")}
+              />
+              {errors.bedrooms && (
+                <p className="text-xs text-destructive">
+                  {errors.bedrooms.message}
+                </p>
+              )}
             </div>
 
             <div className="grid gap-2">
               <Label htmlFor="bathrooms">Bathrooms</Label>
-              <Input id="bathrooms" type="number" value={formData.bathrooms} onChange={(e) => handleChange("bathrooms", e.target.value)} />
+              <Input
+                id="bathrooms"
+                type="number"
+                placeholder="0"
+                {...register("bathrooms")}
+              />
+              {errors.bathrooms && (
+                <p className="text-xs text-destructive">
+                  {errors.bathrooms.message}
+                </p>
+              )}
             </div>
 
             <div className="col-span-2 space-y-4">
               <Label>Listing Type</Label>
               <div className="flex gap-8">
-                <label className="flex items-center gap-2">
-                  <input type="radio" checked={formData.forRent} onChange={() => setFormData(p => ({ ...p, forRent: true, forSale: false }))} />
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <Input
+                    type="radio"
+                    value="rent"
+                    {...register("listingType")}
+                    className="w-4 h-4 accent-teal-600"
+                  />
                   For Rent
                 </label>
-                <label className="flex items-center gap-2">
-                  <input type="radio" checked={formData.forSale} onChange={() => setFormData(p => ({ ...p, forRent: false, forSale: true }))} />
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <Input
+                    type="radio"
+                    value="sale"
+                    {...register("listingType")}
+                    className="w-4 h-4 accent-teal-600"
+                  />
                   For Sale
                 </label>
               </div>
             </div>
 
-            {(formData.forRent || formData.forSale) && (
-              <div className="grid gap-2">
-                <Label>Status</Label>
-                <Select value={formData.status} onValueChange={(v) => handleChange("status", v as typeof formData.status)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {statusOptions.map(s => (
-                      <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            {formData.forRent && (
+            {watchListingType === "rent" && (
               <>
                 <div className="grid gap-2">
                   <Label htmlFor="leaseTerm">Lease Term</Label>
-                  <Input id="leaseTerm" value={formData.leaseTerm} onChange={(e) => handleChange("leaseTerm", e.target.value)} />
+                  <Input
+                    id="leaseTerm"
+                    {...register("leaseTerm")}
+                    placeholder="e.g. 1 year"
+                  />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="rentPrice">Rent Price</Label>
-                  <Input id="rentPrice" type="number" value={formData.rentPrice} onChange={(e) => handleChange("rentPrice", e.target.value)} />
+                  <Label htmlFor="rentPrice">Monthly Rent</Label>
+                  <Input
+                    id="rentPrice"
+                    type="number"
+                    {...register("rentPrice")}
+                  />
                 </div>
               </>
             )}
 
-            {formData.forSale && (
+            {watchListingType === "sale" && (
               <div className="grid gap-2">
                 <Label htmlFor="salePrice">Sale Price</Label>
-                <Input id="salePrice" type="number" value={formData.salePrice} onChange={(e) => handleChange("salePrice", e.target.value)} />
+                <Input
+                  id="salePrice"
+                  type="number"
+                  {...register("salePrice")}
+                />
               </div>
             )}
           </div>
 
-          <DialogFooter>
-<DialogClose asChild>     
-  <Button variant="outline" disabled={isLoading}>Cancel</Button>         
+          <DialogFooter className="mt-6">
+            <DialogClose asChild>
+              <Button variant="outline" type="button">
+                Cancel
+              </Button>
             </DialogClose>
             <Button
               type="submit"
-              className="bg-[#1bada2] hover:bg-teal-700 text-white"
-              disabled={isLoading} 
+              className="bg-primary hover:bg-teal-700 text-white"
+              disabled={addPropertyMutation.isPending}
             >
-              {isLoading ? 'Saving...' : 'Save Listing'}
+              {addPropertyMutation.isPending ? "Saving..." : "Save Listing"}
             </Button>
           </DialogFooter>
         </form>

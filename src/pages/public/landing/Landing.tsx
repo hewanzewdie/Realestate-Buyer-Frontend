@@ -1,5 +1,12 @@
 import Listing from "../listing/Listing";
-import { HouseIcon, HouseHeart, ShoppingBag, ChevronDown, ChevronUp, ArrowRight } from "lucide-react";
+import {
+  HouseIcon,
+  HouseHeart,
+  ShoppingBag,
+  ChevronDown,
+  ChevronUp,
+  ArrowRight,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "../../../components/ui/button";
 import { useState, useEffect } from "react";
@@ -7,7 +14,6 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 export default function Landing() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(3);
   const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
@@ -19,10 +25,8 @@ export default function Landing() {
 
   const handleViewMore = () => {
     if (isExpanded) {
-      setVisibleCount(3);
       setIsExpanded(false);
     } else {
-      setVisibleCount(999); 
       setIsExpanded(true);
     }
     document.getElementById("listings")?.scrollIntoView({ behavior: "smooth" });
@@ -33,20 +37,21 @@ export default function Landing() {
       {/* Hero Section */}
       <div className="flex flex-col md:flex-row items-center justify-between p-5 md:p-10 lg:p-15 gap-8 lg:gap-16">
         <div className="flex flex-col items-start gap-6 md:w-1/2 text-center md:text-left">
-          <p className="text-[#1bada2] font-bold text-xl tracking-wider">
+          <p className="text-primary font-bold text-xl tracking-wider">
             BUY, SELL, RENT EASY
           </p>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
             Your Key to Better Living
           </h1>
           <p className="text-gray-600 text-lg text-start">
-            From Addis Ababa, Ethiopia, we connect buyers and renters with trusted listings —
-            helping you find, sell, or rent properties across vibrant neighborhoods and growing markets.
+            From Addis Ababa, Ethiopia, we connect buyers and renters with
+            trusted listings — helping you find, sell, or rent properties across
+            vibrant neighborhoods and growing markets.
           </p>
-          <Link to='/about'>
-            <Button className="bg-[#1bada2] hover:bg-[#169a8f] cursor-pointer text-white px-8 py-6 text-lg rounded-lg">
+          <Link to="/about">
+            <Button className="bg-primary cursor-pointer text-white px-8 py-6 text-lg rounded-lg">
               Find out more
-              <ArrowRight/>
+              <ArrowRight />
             </Button>
           </Link>
         </div>
@@ -62,20 +67,34 @@ export default function Landing() {
         <h2 className="text-3xl md:text-4xl font-bold mb-4" id="services">
           Services
         </h2>
-        <p className="text-2xl text-gray-700 mb-12">We offer the best services</p>
+        <p className="text-2xl text-gray-700 mb-12">
+          We offer the best services
+        </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {[
-            { icon: HouseIcon, title: "House for Rent", desc: "Urban & suburban houses available for rent" },
-            { icon: HouseHeart, title: "House for Sale", desc: "Premium homes ready for purchase" },
-            { icon: ShoppingBag, title: "Real Estate Market", desc: "List or find your dream property easily" },
+            {
+              icon: HouseIcon,
+              title: "House for Rent",
+              desc: "Urban & suburban houses available for rent",
+            },
+            {
+              icon: HouseHeart,
+              title: "House for Sale",
+              desc: "Premium homes ready for purchase",
+            },
+            {
+              icon: ShoppingBag,
+              title: "Real Estate Market",
+              desc: "List or find your dream property easily",
+            },
           ].map((service, i) => (
             <div
               key={i}
               className="bg-white p-5 rounded-xl shadow-lg hover:shadow-2xl group text-center space-y-2"
             >
-              <div className="inline-block p-4 rounded-lg bg-green-50 group-hover:bg-[#1bada2] transition-colors">
-                <service.icon className="w-8 h-8 text-[#1bada2] group-hover:text-white transition-colors" />
+              <div className="inline-block p-4 rounded-lg bg-green-50 group-hover:bg-primary transition-colors">
+                <service.icon className="w-8 h-8 text-primary group-hover:text-white transition-colors" />
               </div>
               <h3 className="text-xl font-semibold">{service.title}</h3>
               <p className="text-gray-600">{service.desc}</p>
@@ -94,14 +113,14 @@ export default function Landing() {
             Homes are available across Addis Ababa and beyond
           </p>
 
-          <Listing showOnly={visibleCount} />
+          <Listing showOnly={isExpanded ? undefined : 3} />
 
           <div className="flex justify-center mt-12 ">
             <Button
               onClick={handleViewMore}
-              className="bg-[#1bada2] hover:bg-[#169a8f] text-white cursor-pointer w-60 px-10 py-6 text-lg rounded-lg font-medium transition-all shadow-lg"
+              className="bg-primary text-white cursor-pointer w-60 px-10 py-6 text-lg rounded-lg font-medium transition-all shadow-lg"
             >
-              {isExpanded? <ChevronUp/>:<ChevronDown/>}
+              {isExpanded ? <ChevronUp /> : <ChevronDown />}
               {isExpanded ? "Show Less" : "View More Properties"}
             </Button>
           </div>
@@ -117,13 +136,16 @@ export default function Landing() {
         />
         <div className="relative z-10 text-center text-white px-6 max-w-4xl">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight">
-            Ninety percent of all millionaires become so through owning real estate.
+            Ninety percent of all millionaires become so through owning real
+            estate.
           </h1>
           <p className="text-xl mt-4 opacity-90">
             Find your next fortune here.
           </p>
-          <Button className="mt-8 bg-[#1bada2] hover:bg-[#169a8f] text-white px-8 py-6 text-lg rounded-lg">
-            <Link to={isAuthenticated ? "/listings" : "/login"}>{isAuthenticated ? "Find Property": "Get Started"}</Link>
+          <Button className="mt-8 bg-primary text-white px-8 py-6 text-lg rounded-lg">
+            <Link to={isAuthenticated ? "/listings" : "/login"}>
+              {isAuthenticated ? "Find Property" : "Get Started"}
+            </Link>
           </Button>
         </div>
       </div>
